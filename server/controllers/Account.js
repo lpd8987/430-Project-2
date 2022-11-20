@@ -1,7 +1,10 @@
+//CODE REUSED FROM PREVIOUS HW ASSIGNMENT (WITH NEW COMMENTS + ORGANIZATION)//
 const models = require('../models');
 
 const { Account } = models;
 
+
+//RENDER FUNCTIONS//
 // renders the login page
 const loginPage = (req, res) => {
   res.render('login', { csrfToken: req.csrfToken() });
@@ -13,6 +16,12 @@ const logout = (req, res) => {
   res.redirect('/');
 };
 
+// render the settings page
+const settingsPage = (req, res) => {
+  res.render('settings', { csrfToken: req.csrfToken() });
+};
+
+//CONTROLLER FUNCTIONS//
 // login the user by authenticating their credentials
 const login = (req, res) => {
   const username = `${req.body.username}`;
@@ -62,10 +71,7 @@ const signup = async (req, res) => {
   }
 };
 
-// render the settings page
-const settingsPage = (req, res) => {
-  res.render('settings', { csrfToken: req.csrfToken() });
-};
+
 
 // Changes user's password
 const changePass = async (req, res) => {

@@ -1,3 +1,5 @@
+//CODE REUSED FROM PREVIOUS HW ASSIGNMENT + NEW ADDITIONS//
+//REQUIRES
 const path = require('path');
 const express = require('express');
 const compression = require('compression');
@@ -11,35 +13,34 @@ const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
 const redis = require('redis');
 const csrf = require('csurf');
+const config = require('./config.js');
 
 const router = require('./router.js');
 
-const port = process.env.PORT || process.env.NODE_PORT || 3000;
-
-const dbURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1/DomoMaker';
-mongoose.connect(dbURI, (err) => {
+//MONGO
+mongoose.connect(config.connections.mongo, (err) => {
   if (err) {
     console.log('Could not connect to database');
     throw err;
   }
 });
 
-const redisURL = process.env.REDISCLOUD_URL || 'redis://default:torX40Xm1mur3m6tiUq2yq3RrG8mAKAM@redis-16378.c8.us-east-1-3.ec2.cloud.redislabs.com:16378';
-
+//REDIS
 const redisClient = redis.createClient({
   legacyMode: true,
-  url: redisURL,
+  url: config.connections.redis,
 });
 redisClient.connect().catch(console.error);
 
 const app = express();
 
+//APP SETUP
 app.use(helmet({
   crossOriginEmbedderPolicy: false,
   contentSecurityPolicy: false,
 }));
 app.use('/assets', express.static(path.resolve(`${__dirname}/../hosted/`)));
-app.use(favicon(`${__dirname}/../hosted/img/favicon.png`));
+//app.use(favicon(`${__dirname}/../hosted/img/favicon.png`));
 app.use(compression());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -48,7 +49,7 @@ app.use(session({
   store: new RedisStore({
     client: redisClient,
   }),
-  secret: 'Domo Arigato',
+  secret: config.secret,
   resave: true,
   saveUninitialized: true,
   cookie: {
@@ -70,7 +71,8 @@ app.use((err, req, res, next) => {
 
 router(app);
 
-app.listen(port, (err) => {
+//STARTUP
+app.listen(config.connections.http.port, (err) => {
   if (err) { throw err; }
   console.log(`Listening on port ${port}`);
 });
