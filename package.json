@@ -46,6 +46,7 @@
     "express-session": "^1.17.3",
     "helmet": "^6.0.0",
     "mongoose": "^6.7.2",
+    "pixi.js": "^7.0.4",
     "redis": "^4.5.0",
     "serve-favicon": "^2.5.0",
     "underscore": "^1.13.6",
