@@ -9,6 +9,7 @@ export { utils };
 export * from '@pixi/core';
 export * from '@pixi/app';
 export * from '@pixi/sprite';
+export * from '@pixi/assets';
 
 // Renderer plugins
 import * as Renderer from '@pixi/core';
