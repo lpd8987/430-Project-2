@@ -1,9 +1,9 @@
-//CODE REUSED FROM PREVIOUS HW ASSIGNMENT + NEW ADDITIONS//
-//REQUIRES
+// CODE REUSED FROM PREVIOUS HW ASSIGNMENT + NEW ADDITIONS//
+// REQUIRES
 const path = require('path');
 const express = require('express');
 const compression = require('compression');
-const favicon = require('serve-favicon');
+// const favicon = require('serve-favicon');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -17,7 +17,7 @@ const config = require('./config.js');
 
 const router = require('./router.js');
 
-//MONGO
+// MONGO
 mongoose.connect(config.connections.mongo, (err) => {
   if (err) {
     console.log('Could not connect to database');
@@ -25,7 +25,7 @@ mongoose.connect(config.connections.mongo, (err) => {
   }
 });
 
-//REDIS
+// REDIS
 const redisClient = redis.createClient({
   legacyMode: true,
   url: config.connections.redis,
@@ -34,13 +34,13 @@ redisClient.connect().catch(console.error);
 
 const app = express();
 
-//APP SETUP
+// APP SETUP
 app.use(helmet({
   crossOriginEmbedderPolicy: false,
   contentSecurityPolicy: false,
 }));
 app.use('/assets', express.static(path.resolve(`${__dirname}/../hosted/`)));
-//app.use(favicon(`${__dirname}/../hosted/img/favicon.png`));
+// app.use(favicon(`${__dirname}/../hosted/img/favicon.png`));
 app.use(compression());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -71,8 +71,8 @@ app.use((err, req, res, next) => {
 
 router(app);
 
-//STARTUP
+// STARTUP
 app.listen(config.connections.http.port, (err) => {
   if (err) { throw err; }
-  console.log(`Listening on port ${port}`);
+  console.log(`Listening on port ${config.connections.http.port}`);
 });

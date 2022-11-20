@@ -1,10 +1,9 @@
-//CODE REUSED FROM PREVIOUS HW ASSIGNMENT (WITH NEW COMMENTS + ORGANIZATION)//
+// CODE REUSED FROM PREVIOUS HW ASSIGNMENT (WITH NEW COMMENTS + ORGANIZATION)//
 const models = require('../models');
 
 const { Account } = models;
 
-
-//RENDER FUNCTIONS//
+// RENDER FUNCTIONS//
 // renders the login page
 const loginPage = (req, res) => {
   res.render('login', { csrfToken: req.csrfToken() });
@@ -21,7 +20,7 @@ const settingsPage = (req, res) => {
   res.render('settings', { csrfToken: req.csrfToken() });
 };
 
-//CONTROLLER FUNCTIONS//
+// CONTROLLER FUNCTIONS//
 // login the user by authenticating their credentials
 const login = (req, res) => {
   const username = `${req.body.username}`;
@@ -38,7 +37,7 @@ const login = (req, res) => {
 
     req.session.account = Account.toAPI(account);
 
-    return res.json({ redirect: '/maker' });
+    return res.json({ redirect: '/app' });
   });
 };
 
@@ -61,7 +60,7 @@ const signup = async (req, res) => {
     const newAccount = new Account({ username, password: hash });
     await newAccount.save();
     req.session.account = Account.toAPI(newAccount);
-    return res.json({ redirect: '/maker' });
+    return res.json({ redirect: '/app' });
   } catch (err) {
     console.log(err);
     if (err.code === 11000) {
@@ -70,8 +69,6 @@ const signup = async (req, res) => {
     return res.status(400).json({ error: 'An error occured.' });
   }
 };
-
-
 
 // Changes user's password
 const changePass = async (req, res) => {

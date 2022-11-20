@@ -1,13 +1,13 @@
-//CODE REUSED FROM PREVIOUS HW ASSIGNMENT (WITH NEW COMMENTS)//
+// CODE REUSED FROM PREVIOUS HW ASSIGNMENT (WITH NEW COMMENTS)//
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 
-//The model object to export
+// The model object to export
 let AccountModel = {};
 
-//The schema that the model will use
-//Accounts will store a username and password
-//(also a created date for good practice)
+// The schema that the model will use
+// Accounts will store a username and password
+// (also a created date for good practice)
 const AccountSchema = new mongoose.Schema({
   username: {
     type: String,
@@ -36,7 +36,7 @@ AccountSchema.statics.toAPI = (doc) => ({
 const saltRounds = 10;
 AccountSchema.statics.generateHash = (password) => bcrypt.hash(password, saltRounds);
 
-//Helper function to compare a hashed password against an existing user password
+// Helper function to compare a hashed password against an existing user password
 AccountSchema.statics.authenticate = async (username, password, callback) => {
   try {
     const doc = await AccountModel.findOne({ username }).exec();
@@ -54,7 +54,7 @@ AccountSchema.statics.authenticate = async (username, password, callback) => {
   }
 };
 
-//Convert the empty AccountModel object to something that can be stored by Mongoose 
+// Convert the empty AccountModel object to something that can be stored by Mongoose
 AccountModel = mongoose.model('Account', AccountSchema);
 
 module.exports = AccountModel;
