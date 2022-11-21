@@ -23,7 +23,7 @@ const AccountSchema = new mongoose.Schema({
   highScore: {
     type: Number,
     required: false,
-    default: 0
+    default: 0,
   },
   createdDate: {
     type: Date,
