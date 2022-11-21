@@ -1,6 +1,5 @@
 const helper = require("./helper.js");
-//import { Assets } from "pixi.js";
-import * as PIXI from "./pixi.js"; 
+import * as PIXI from "./pixi.js";
 
 //Bools that are tied to input
 let leftInputPressed = false;
@@ -8,12 +7,14 @@ let rightInputPressed = false;
 let topInputPressed = false;
 let bottomInputPressed = false;
 
+let mousePosition = {x: 0, y: 0}
 
 //REACT COMPONENT
 const PIXIApp = () => {
     return (
         <div id="gameArea">
             <h1>GAME</h1>
+            <p id="mousePosition"></p>
         </div>
     );
 };
@@ -21,6 +22,7 @@ const PIXIApp = () => {
 //Render loop
 const loop = (app, sprite) => {
     app.ticker.add(() => {
+
         if(leftInputPressed){
             sprite.x -= 5;
         }
@@ -33,6 +35,11 @@ const loop = (app, sprite) => {
         if(bottomInputPressed){
             sprite.y += 5;
         }
+
+        document.getElementById('mousePosition').innerText = `${mousePosition.x}, ${mousePosition.y}`;
+        //document.getElementById('mousePosition').innerText = `${sprite.x}, ${sprite.y}`;
+
+        sprite.rotation = Math.atan2((mousePosition.y - sprite.y), (mousePosition.x - sprite.x));
     });
 };
 
@@ -74,6 +81,14 @@ const setupInputEvents = () => {
                 break;
         }
     };
+
+
+};
+
+const mouseClick = (e) => {
+    //console.log('Mouse clicked');
+    mousePosition.x = e.data.global.x;
+    mousePosition.y = e.data.global.y;
 };
 
 //Create the app and begin the render loop
@@ -81,7 +96,14 @@ const initApp = async () => {
     const app = new PIXI.Application();
     document.getElementById('gameArea').appendChild(app.view);
 
-    const texture = await PIXI.Assets.load('/assets/img/marioSprite.png');
+    const bgTex = await PIXI.Assets.load('/assets/img/darkBackground.jpg');
+    const bg = new PIXI.Sprite(bgTex);
+    bg.scale = {x: 2, y: 2};
+    bg.interactive = true;
+    bg.on("mousemove", mouseClick);
+    app.stage.addChild(bg);
+
+    const texture = await PIXI.Assets.load('/assets/img/topDownSprite.png');
     const dummySprite = new PIXI.Sprite(texture);
 
     dummySprite.scale = {x:0.3, y:0.3};

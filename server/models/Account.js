@@ -20,6 +20,11 @@ const AccountSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  highScore: {
+    type: Number,
+    required: false,
+    default: 0
+  },
   createdDate: {
     type: Date,
     default: Date.now,
