@@ -25,33 +25,48 @@ let topInputPressed = false;
 let bottomInputPressed = false;
 
 //Track the mouse position
-let mousePosition = {x: 0, y: 0}
+const mousePosition = {x: 0, y: 0}
 
-//Render loop
+
+
+//The score for the current game session
+let currentScore;
+
+//Render/Game loop
 const loop = (app, sprite) => {
     app.ticker.add(() => {
+        //Update Player
+        playerInput(sprite);
 
-        //Move the player around the screen
-        if(leftInputPressed){
-            sprite.x -= 5;
-        }
-        if(rightInputPressed){
-            sprite.x += 5;
-        }
-        if(topInputPressed){
-            sprite.y -= 5;
-        }
-        if(bottomInputPressed){
-            sprite.y += 5;
-        }
-
-        //AABB check with collectibles
-
-        //document.getElementById('mousePosition').innerText = `${mousePosition.x}, ${mousePosition.y}`;
-        //document.getElementById('mousePosition').innerText = `${sprite.x}, ${sprite.y}`;
-
-        sprite.rotation = Math.atan2((mousePosition.y - sprite.y), (mousePosition.x - sprite.x));
+        //Check for Collisions
     });
+};
+
+//#region Input
+
+//Updates the mouse position
+const getMousePosition = (e) => {
+    mousePosition.x = e.data.global.x;
+    mousePosition.y = e.data.global.y;
+};
+
+//Player input
+const playerInput = (player) => {
+//Move the player around the screen
+    if(leftInputPressed){
+        player.x -= 5;
+    }
+    if(rightInputPressed){
+        player.x += 5;
+    }
+    if(topInputPressed){
+        player.y -= 5;
+    }
+    if(bottomInputPressed){
+        player.y += 5;
+    }
+
+    player.rotation = Math.atan2((mousePosition.y - sprite.y), (mousePosition.x - sprite.x));
 };
 
 //Sets up the key events that will be tied to game functions
@@ -92,14 +107,60 @@ const setupInputEvents = () => {
                 break;
         }
     };
+};
 
+//#endregion
+
+//#region Setup and Helper Functions 
+
+//Returns True or False depending on whether the boxes touch
+/*AABB Method Code Adapted from Prof. Dower Chin's tutorial on PIXI.js Collision
+Link: https://www.youtube.com/watch?v=-q_Zk5uxk7Q*/
+const AABBCollision = (a, b) => {
+    //Get required properties of objects
+    let objA = a.getBounds();
+    let objB = b.getBounds();
+
+    //Make the 4 checks necessary to determine a collision
+    return objA.x + objA.width > objB.x 
+        && objA.x < objB.x + objB.width
+        && objA.y + objA.height > objB.y
+        && objA.y < objB.y + objB.height;
+};
+
+const setupPlayer = async (app) => {
+    //Player Sprite
+    const texture = await PIXI.Assets.load('/assets/img/topDownSprite.png');
+    const playerSprite = new PIXI.Sprite(texture);
+
+    //Background Properties
+    playerSprite.scale = {x:0.3, y:0.3};
+
+    playerSprite.x = app.renderer.width/2;
+    playerSprite.y = app.renderer.height/2;
+
+    playerSprite.anchor.x = 0.5;
+    playerSprite.anchor.y = 0.5;
+
+    app.stage.addChild(playerSprite);
+
+    return playerSprite;
+};
+
+const setupBackground = () => {
 
 };
 
-const getMousePosition = (e) => {
-    mousePosition.x = e.data.global.x;
-    mousePosition.y = e.data.global.y;
+const setupCollectibles = () => {
+
 };
+
+const setupEnemies = () => {
+
+};
+
+//#endregion
+
 
 //Create the app and begin the render loop
 const initApp = async () => {
@@ -116,25 +177,30 @@ const initApp = async () => {
     bg.on("mousemove", getMousePosition);
     app.stage.addChild(bg);
 
-    //Player Sprite
     const texture = await PIXI.Assets.load('/assets/img/topDownSprite.png');
-    const dummySprite = new PIXI.Sprite(texture);
+    const playerSprite = new PIXI.Sprite(texture);
 
     //Background Properties
-    dummySprite.scale = {x:0.3, y:0.3};
+    playerSprite.scale = {x:0.3, y:0.3};
 
-    dummySprite.x = app.renderer.width/2;
-    dummySprite.y = app.renderer.height/2;
+    playerSprite.x = app.renderer.width/2;
+    playerSprite.y = app.renderer.height/2;
 
-    dummySprite.anchor.x = 0.5;
-    dummySprite.anchor.y = 0.5;
+    playerSprite.anchor.x = 0.5;
+    playerSprite.anchor.y = 0.5;
 
-    app.stage.addChild(dummySprite);
+    app.stage.addChild(playerSprite);
+
+    //Pickups
+    setupCollectibles();
+
+    //Enemies
+    setupEnemies();
 
     //Complete setup and start loop
     setupInputEvents();
 
-    loop(app, dummySprite);
+    loop(app, playerSprite);
 };
 
 export { initApp }
