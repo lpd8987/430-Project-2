@@ -12,15 +12,16 @@ let bottomInputPressed = false;
 const mousePosition = {x: 0, y: 0}
 
 //The score for the current game session
-let currentScore;
+let currentScore = 0;
 
 //Render/Game loop
-const loop = (app, sprite) => {
+const loop = (app, player, pickups) => {
     app.ticker.add(() => {
-        //Update Player
-        playerInput(sprite);
+        //Update Player based on input
+        playerInput(player);
 
         //Check for Collisions
+        checkCollisions(app, player, pickups);
     });
 };
 
@@ -99,6 +100,11 @@ const setupInputEvents = () => {
 /*AABB Method Code Adapted from Prof. Dower Chin's tutorial on PIXI.js Collision
 Link: https://www.youtube.com/watch?v=-q_Zk5uxk7Q*/
 const AABBCollision = (a, b) => {
+    //validate that the objects exist, otherwise exit the function
+    if(!a || !b) {
+        return;
+    }
+
     //Get required properties of objects
     let objA = a.getBounds();
     let objB = b.getBounds();
@@ -110,12 +116,32 @@ const AABBCollision = (a, b) => {
         && objA.y < objB.y + objB.height;
 };
 
+const checkCollisions = (app, player, pickups) => {
+    if(!player || pickups.length < 1) {
+        return;
+    }
+
+    //Check Player against each Pickup
+    for(let i = 0; i < pickups.length; i++) {
+        if(AABBCollision(player, pickups[i])) {
+            app.stage.removeChild(pickups[i]);
+            pickups.splice(i, 1);
+            currentScore++;
+            console.log(`Pickup acquired! Current Score: ${currentScore}`);
+        }
+    }
+
+    //TODO: Check Player against each Enemy
+
+};
+
+//Returns a Sprite object after loading the proper texture;
 const setupPlayer = async (app) => {
-    //Player Sprite
+    //Sprite Setup
     const texture = await PIXI.Assets.load('/assets/img/topDownSprite.png');
     const playerSprite = new PIXI.Sprite(texture);
 
-    //Background Properties
+    //Properties
     playerSprite.scale = {x:0.3, y:0.3};
 
     playerSprite.x = app.renderer.width/2;
@@ -129,12 +155,40 @@ const setupPlayer = async (app) => {
     return playerSprite;
 };
 
-const setupBackground = () => {
+const setupBackground = async (app) => {
+    //Background is its own sprite
+    const bgTex = await PIXI.Assets.load('/assets/img/darkBackground.jpg');
+    const bg = new PIXI.Sprite(bgTex);
 
+    //Edit background properties
+    bg.scale = {x: 2, y: 2};
+    bg.interactive = true;
+    bg.on("mousemove", getMousePosition);
+
+    app.stage.addChild(bg);
+
+    return bg;
 };
 
-const setupCollectibles = () => {
+const setupCollectibles = async (app, numCollectibles) => {
+     //Pickup Sprites
+     const pickups = [];
 
+     const pickupTex = await PIXI.Assets.load('/assets/img/coin.png');
+
+     for (let i = 0; i < numCollectibles; i++) {
+        const pickupSprite = new PIXI.Sprite(pickupTex);
+ 
+        pickupSprite.scale = {x:0.1, y:0.1};
+    
+        pickupSprite.x = Math.floor(Math.random() * app.renderer.width);
+        pickupSprite.y = Math.floor(Math.random() * app.renderer.width);
+    
+        app.stage.addChild(pickupSprite);
+        pickups.push(pickupSprite);
+     }
+
+     return pickups;
 };
 
 const setupEnemies = () => {
@@ -149,32 +203,14 @@ const initApp = async () => {
     const app = new PIXI.Application();
     document.getElementById('gameArea').appendChild(app.view);
 
-    //Background is its own sprite
-    const bgTex = await PIXI.Assets.load('/assets/img/darkBackground.jpg');
-    const bg = new PIXI.Sprite(bgTex);
+    //Draw Order: Background, Player, Pickups, Enemies;
+    await setupBackground(app);
 
-    //Edit background properties
-    bg.scale = {x: 2, y: 2};
-    bg.interactive = true;
-    bg.on("mousemove", getMousePosition);
-    app.stage.addChild(bg);
-
-    const texture = await PIXI.Assets.load('/assets/img/topDownSprite.png');
-    const playerSprite = new PIXI.Sprite(texture);
-
-    //Background Properties
-    playerSprite.scale = {x:0.3, y:0.3};
-
-    playerSprite.x = app.renderer.width/2;
-    playerSprite.y = app.renderer.height/2;
-
-    playerSprite.anchor.x = 0.5;
-    playerSprite.anchor.y = 0.5;
-
-    app.stage.addChild(playerSprite);
+    //Player Object
+    const playerSprite = await setupPlayer(app);
 
     //Pickups
-    setupCollectibles();
+    const pickups = await setupCollectibles(app, 3);
 
     //Enemies
     setupEnemies();
@@ -182,7 +218,7 @@ const initApp = async () => {
     //Complete setup and start loop
     setupInputEvents();
 
-    loop(app, playerSprite);
+    loop(app, playerSprite, pickups);
 };
 
 export { initApp }
