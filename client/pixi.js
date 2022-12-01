@@ -1,22 +1,6 @@
-//CODE FROM https://pixijs.io/customize/
-//export * from '@pixi/constants';
-//export * from '@pixi/math';
-//export * from '@pixi/runner';
-//export * from '@pixi/settings';
-//export * from '@pixi/ticker';
-//export * from '@pixi/core';
-//export * from '@pixi/app';
-//export * from '@pixi/sprite';
-//export * from '@pixi/assets';
-//export * from '@pixi/utils';
-//export * from '@pixi/events';
+//This file handles all logic for the game within the React App//
 
-// Renderer plugins
-//import * as Renderer from '@pixi/core';
-//export { Renderer };
-
-//Attempt to put PIXI code externally from JSX
-import * as PIXI from 'pixi.js';
+import * as PIXI from './pixiModule.js';
 
 //Bools that are tied to input
 let leftInputPressed = false;
@@ -26,8 +10,6 @@ let bottomInputPressed = false;
 
 //Track the mouse position
 const mousePosition = {x: 0, y: 0}
-
-
 
 //The score for the current game session
 let currentScore;
@@ -66,7 +48,7 @@ const playerInput = (player) => {
         player.y += 5;
     }
 
-    player.rotation = Math.atan2((mousePosition.y - sprite.y), (mousePosition.x - sprite.x));
+    player.rotation = Math.atan2((mousePosition.y - player.y), (mousePosition.x - player.x));
 };
 
 //Sets up the key events that will be tied to game functions
