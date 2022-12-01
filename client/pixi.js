@@ -2,6 +2,9 @@
 
 import * as PIXI from './pixiModule.js';
 
+//Declare the variable so that after the texture is loaded, it can be reused.
+let pickupTex;
+
 //Bools that are tied to input
 let leftInputPressed = false;
 let rightInputPressed = false;
@@ -96,6 +99,8 @@ const setupInputEvents = () => {
 
 //#region Setup and Helper Functions 
 
+//HELPERS//
+
 //Returns True or False depending on whether the boxes touch
 /*AABB Method Code Adapted from Prof. Dower Chin's tutorial on PIXI.js Collision
 Link: https://www.youtube.com/watch?v=-q_Zk5uxk7Q*/
@@ -124,16 +129,46 @@ const checkCollisions = (app, player, pickups) => {
     //Check Player against each Pickup
     for(let i = 0; i < pickups.length; i++) {
         if(AABBCollision(player, pickups[i])) {
+            //Remove the sprite from the game and array
             app.stage.removeChild(pickups[i]);
             pickups.splice(i, 1);
+
+            //Increment Score
             currentScore++;
+
             console.log(`Pickup acquired! Current Score: ${currentScore}`);
+
+            //Add a new collectible to make up for the destroyed one
+            respawnCollectible(app, pickups);
         }
     }
 
     //TODO: Check Player against each Enemy
 
 };
+
+//Spawns a new collectible (assumes that the texture has already been loaded)
+const respawnCollectible = (app, pickups) => {
+    //Make sure the texture has already been loaded
+    if (!pickupTex) {
+        return;
+    }
+
+    const pickupSprite = new PIXI.Sprite(pickupTex);
+ 
+    pickupSprite.scale = {x:0.1, y:0.1};
+
+    pickupSprite.x = Math.floor(Math.random() * app.renderer.width);
+    pickupSprite.y = Math.floor(Math.random() * app.renderer.height);
+
+    pickupSprite.anchor.x = 0.5;
+    pickupSprite.anchor.y = 0.5;
+
+    app.stage.addChild(pickupSprite);
+    pickups.push(pickupSprite);
+};
+
+//SETUP//
 
 //Returns a Sprite object after loading the proper texture;
 const setupPlayer = async (app) => {
@@ -174,7 +209,8 @@ const setupCollectibles = async (app, numCollectibles) => {
      //Pickup Sprites
      const pickups = [];
 
-     const pickupTex = await PIXI.Assets.load('/assets/img/coin.png');
+     //only load the pickup texture once
+     pickupTex = await PIXI.Assets.load('/assets/img/coin.png');
 
      for (let i = 0; i < numCollectibles; i++) {
         const pickupSprite = new PIXI.Sprite(pickupTex);
@@ -183,6 +219,9 @@ const setupCollectibles = async (app, numCollectibles) => {
     
         pickupSprite.x = Math.floor(Math.random() * app.renderer.width);
         pickupSprite.y = Math.floor(Math.random() * app.renderer.width);
+
+        pickupSprite.anchor.x = 0.5;
+        pickupSprite.anchor.y = 0.5;
     
         app.stage.addChild(pickupSprite);
         pickups.push(pickupSprite);
