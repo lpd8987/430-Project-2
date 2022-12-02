@@ -1,5 +1,4 @@
 //This file handles all logic for the game within the React App//
-
 import * as PIXI from './pixiModule.js';
 
 //Declare the variable so that after the texture is loaded, it can be reused.
@@ -17,16 +16,8 @@ const mousePosition = {x: 0, y: 0}
 //The score for the current game session
 let currentScore = 0;
 
-//Render/Game loop
-const loop = (app, player, pickups) => {
-    app.ticker.add(() => {
-        //Update Player based on input
-        playerInput(player);
-
-        //Check for Collisions
-        checkCollisions(app, player, pickups);
-    });
-};
+let scoreDisplay;
+let highScoreDisplay;
 
 //#region Input
 
@@ -97,9 +88,7 @@ const setupInputEvents = () => {
 
 //#endregion
 
-//#region Setup and Helper Functions 
-
-//HELPERS//
+//#region Helper Functions 
 
 //Returns True or False depending on whether the boxes touch
 /*AABB Method Code Adapted from Prof. Dower Chin's tutorial on PIXI.js Collision
@@ -121,8 +110,9 @@ const AABBCollision = (a, b) => {
         && objA.y < objB.y + objB.height;
 };
 
-const checkCollisions = (app, player, pickups) => {
-    if(!player || pickups.length < 1) {
+//Checks whether a player is in contact with an interactable object
+const checkCollisions = (app, player, pickups, enemies) => {
+    if(!player || pickups.length < 1 || !enemies) {
         return;
     }
 
@@ -136,7 +126,8 @@ const checkCollisions = (app, player, pickups) => {
             //Increment Score
             currentScore++;
 
-            console.log(`Pickup acquired! Current Score: ${currentScore}`);
+            //FOR DEBUG PURPOSES
+            //console.log(`Pickup acquired! Current Score: ${currentScore}`);
 
             //Add a new collectible to make up for the destroyed one
             respawnCollectible(app, pickups);
@@ -144,7 +135,12 @@ const checkCollisions = (app, player, pickups) => {
     }
 
     //TODO: Check Player against each Enemy
-
+    for(const enemy of enemies) {
+        if(AABBCollision(player, enemy)) {
+            clearApp(app, player, pickups, enemies);
+            return;
+        }
+    }
 };
 
 //Spawns a new collectible (assumes that the texture has already been loaded)
@@ -154,6 +150,7 @@ const respawnCollectible = (app, pickups) => {
         return;
     }
 
+    //Create a new Sprite
     const pickupSprite = new PIXI.Sprite(pickupTex);
  
     pickupSprite.scale = {x:0.1, y:0.1};
@@ -168,9 +165,31 @@ const respawnCollectible = (app, pickups) => {
     pickups.push(pickupSprite);
 };
 
-//SETUP//
+//clears the app of all sprites
+const clearApp = (app, player, pickups, enemies) => {
+    //delete player
+    app.stage.removeChild(player);
 
-//Returns a Sprite object after loading the proper texture;
+    //delete pickups
+    for(let i = 0; i < pickups.length; i++){
+        app.stage.removeChild(pickups[i]);
+        pickups.splice(i, 1);
+    }
+
+    //delete enemies
+    for(let i = 0; i < enemies.length; i++){
+        app.stage.removeChild(enemies[i]);
+        enemies.splice(i, 1);
+    }
+
+    highScoreDisplay.innerHTML = currentScore;
+};
+
+//#endregion
+
+//#region Setup
+
+//RETURNS A SPRITE OBJECT IN THE SCENE//
 const setupPlayer = async (app) => {
     //Sprite Setup
     const texture = await PIXI.Assets.load('/assets/img/topDownSprite.png');
@@ -230,12 +249,46 @@ const setupCollectibles = async (app, numCollectibles) => {
      return pickups;
 };
 
-const setupEnemies = () => {
+const setupEnemies = async (app, numEnemies) => {
+    const enemies  = [];
 
+    const enemyTex = await PIXI.Assets.load('/assets/img/monster.jpg');
+
+    for (let i = 0; i <= numEnemies; i++) {
+        const enemySprite = new PIXI.Sprite(enemyTex);
+ 
+        enemySprite.scale = {x:0.1, y:0.1};
+    
+        enemySprite.x = Math.floor(Math.random() * app.renderer.width);
+        enemySprite.y = Math.floor(Math.random() * app.renderer.width);
+
+        enemySprite.anchor.x = 0.5;
+        enemySprite.anchor.y = 0.5;
+    
+        app.stage.addChild(enemySprite);
+        enemies.push(enemySprite);
+     }
+
+     return enemies;
 };
 
 //#endregion
 
+//#region Main Methods
+
+//Render/Game loop
+const loop = (app, player, pickups, enemies) => {
+    app.ticker.add(() => {
+        //Update the score on the screen
+        scoreDisplay.innerHTML = currentScore;
+
+        //Update Player based on input
+        playerInput(player);
+
+        //Check for Collisions
+        checkCollisions(app, player, pickups, enemies);
+    });
+};
 
 //Create the app and begin the render loop
 const initApp = async () => {
@@ -252,12 +305,17 @@ const initApp = async () => {
     const pickups = await setupCollectibles(app, 3);
 
     //Enemies
-    setupEnemies();
+    const enemies = await setupEnemies(app, 1);
 
     //Complete setup and start loop
     setupInputEvents();
 
-    loop(app, playerSprite, pickups);
+    scoreDisplay = document.getElementById('score');
+    highScoreDisplay = document.getElementById("highScore");
+
+    loop(app, playerSprite, pickups, enemies);
 };
+
+//#endregion
 
 export { initApp }

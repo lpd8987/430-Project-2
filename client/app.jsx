@@ -6,7 +6,8 @@ const PIXIApp = () => {
     return (
         <div id="gameArea">
             <h1>GAME</h1>
-            <p id="mousePosition"></p>
+            <h2 id="score"></h2>
+            <p id="highScore">High Score: </p>
         </div>
     );
 };
