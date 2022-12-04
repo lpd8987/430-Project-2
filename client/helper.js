@@ -10,6 +10,7 @@ const handleError = (message) => {
    entries in the response JSON object, and will handle them appropriately.
 */
 const sendPost = async (url, data, handler) => {
+    console.log("IN SENDPOST in HELPER.JS");
     const response = await fetch(url, {
       method: 'POST',
       headers: {

@@ -1,5 +1,9 @@
 //This file handles all logic for the game within the React App//
+const helper = require("./helper.js");
 import * as PIXI from './pixiModule.js';
+
+//Data from the React Component
+let appData;
 
 //Declare the variable so that after the texture is loaded, it can be reused.
 let pickupTex;
@@ -137,7 +141,7 @@ const checkCollisions = (app, player, pickups, enemies) => {
     //TODO: Check Player against each Enemy
     for(const enemy of enemies) {
         if(AABBCollision(player, enemy)) {
-            clearApp(app, player, pickups, enemies);
+            gameOver(app, player, pickups, enemies);
             return;
         }
     }
@@ -166,7 +170,7 @@ const respawnCollectible = (app, pickups) => {
 };
 
 //clears the app of all sprites
-const clearApp = (app, player, pickups, enemies) => {
+const gameOver = (app, player, pickups, enemies) => {
     //delete player
     app.stage.removeChild(player);
 
@@ -182,7 +186,13 @@ const clearApp = (app, player, pickups, enemies) => {
         enemies.splice(i, 1);
     }
 
-    highScoreDisplay.innerHTML = currentScore;
+    saveData(currentScore);
+};
+
+//Saves current score as high score if it is higher
+const saveData =  (score) => {
+    console.log("IN SAVEDATA in PIXI.JS");
+    helper.sendPost("/saveScore", {score: score, _csrf: appData.csrfToken});
 };
 
 //#endregion
@@ -190,6 +200,23 @@ const clearApp = (app, player, pickups, enemies) => {
 //#region Setup
 
 //RETURNS A SPRITE OBJECT IN THE SCENE//
+const getPlayerData = async () => {
+    const dbData = await fetch("/getCurrentPlayerData");
+    const dbDataJSON = await dbData.json();
+
+    console.log(dbDataJSON);
+
+    if(dbDataJSON){
+        highScoreDisplay.innerHTML = dbDataJSON.highScore;
+    } else {
+        highScoreDisplay.innerHTML = 0;
+    }
+};
+
+/*const getMultiplayerData = async () => {
+
+};*/
+
 const setupPlayer = async (app) => {
     //Sprite Setup
     const texture = await PIXI.Assets.load('/assets/img/topDownSprite.png');
@@ -291,7 +318,9 @@ const loop = (app, player, pickups, enemies) => {
 };
 
 //Create the app and begin the render loop
-const initApp = async () => {
+const initApp = async (data) => {
+    appData = data;
+
     const app = new PIXI.Application();
     document.getElementById('gameArea').appendChild(app.view);
 
@@ -312,6 +341,8 @@ const initApp = async () => {
 
     scoreDisplay = document.getElementById('score');
     highScoreDisplay = document.getElementById("highScore");
+
+    await getPlayerData();
 
     loop(app, playerSprite, pickups, enemies);
 };

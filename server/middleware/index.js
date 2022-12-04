@@ -10,7 +10,7 @@ const requiresLogin = (req, res, next) => {
 // Mark a page as requiring successful logout to access
 const requiresLogout = (req, res, next) => {
   if (req.session.account) {
-    return res.redirect('/maker');
+    return res.redirect('/app');
   }
   return next();
 };

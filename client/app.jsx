@@ -1,4 +1,3 @@
-const helper = require("./helper.js");
 const PIXI = require("./pixi.js");
 
 //REACT COMPONENT
@@ -22,7 +21,7 @@ const init = async () => {
         document.getElementById('content')
         );
 
-    PIXI.initApp();
+    PIXI.initApp(data);
 };
 
 window.onload = init;

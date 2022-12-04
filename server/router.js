@@ -14,6 +14,7 @@ const router = (app) => {
   // APP
   app.get('/app', mid.requiresSecure, mid.requiresLogin, controllers.App.appPage);
   app.post('/saveScore', mid.requiresSecure, mid.requiresLogin, controllers.App.saveScore);
+  app.get('/getCurrentPlayerData', mid.requiresSecure, mid.requiresLogin, controllers.App.getCurrentPlayerData);
 
   // SIGNUP
   app.post('/signup', mid.requiresSecure, mid.requiresLogout, controllers.Account.signup);
