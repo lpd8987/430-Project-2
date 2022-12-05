@@ -39,7 +39,7 @@ const login = (req, res) => {
     }
 
     req.session.account = Account.toAPI(account);
-    console.log(req.session.account);
+    //console.log(req.session.account);
 
     return res.json({ redirect: '/app' });
   });
@@ -78,7 +78,7 @@ const signup = async (req, res) => {
 const changePass = async (req, res) => {
   // to change their password, the user must type their old password in
   // then then add/retype their new password
-  const { username } = req.session.account;
+  const username  = req.session.account.username;
 
   const oldPass = `${req.body.oldPassword}`;
   const newPass = `${req.body.newPassword}`;
@@ -92,7 +92,7 @@ const changePass = async (req, res) => {
   // Assuming the user has made it this far, attempt to change the password
   try {
     // get a reference to the current account
-    const userAccount = await Account.findOne({ username }).exec();
+    const userAccount = await Account.findOne({ "username": username }).exec();
 
     // If userAccount is not found, throw an error
     /* Theoretically this should not be triggered if REDIS is working correctly */
@@ -113,6 +113,54 @@ const changePass = async (req, res) => {
   }
 };
 
+//Change the current user's username
+/*Code is largely the same as for change password, but changing username does not
+require as much security, nor does it automatically sign the current user out.*/
+const changeUser = async (req, res) => {
+  const username = req.session.account.username;
+
+  const newUsername = `${req.body.newUsername}`;
+
+  if (!newUsername) {
+    return res.status(400).json({ error: 'Missing required parameters!' });
+  }
+
+  //Check whether the username is already in the database
+  try{
+    const existingUserCheck = await Account.findOne({"username": newUsername}).exec();
+    if(existingUserCheck){
+      return res.status(400).json({error: "Username already taken!"});
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({error: 'An error occured.'})
+  }
+
+  //Otherwise, find the current account and save over it.
+  try {
+    const currentUser = await Account.findOne({"username": username}).exec();
+
+    // If userAccount is not found, throw an error
+    /* Theoretically this should not be triggered if REDIS is working correctly */
+    if (!currentUser) {
+      throw new Error();
+    }
+
+    //Save the new username to the account
+    currentUser.username = newUsername;
+    await currentUser.save();
+
+    //Save the username change in session details
+    req.session.account = Account.toAPI(currentUser);
+    
+    return res.status(201).json({message: "Username changed successfully!"});
+
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({ error: 'An error occured.' });
+  }
+};
+
 // generates a new CSRF token on request
 const getToken = (req, res) => res.json({ csrfToken: req.csrfToken() });
 
@@ -123,5 +171,6 @@ module.exports = {
   signup,
   settingsPage,
   changePass,
+  changeUser,
   getToken,
 };

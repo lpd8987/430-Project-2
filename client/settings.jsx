@@ -31,6 +31,22 @@ const handlePasswordChange = (e) => {
     helper.sendPost(e.target.action, {oldPassword, newPassword, newPassword2, _csrf});
 };
 
+const handleUsernameChange = (e) => {
+    e.preventDefault();
+    helper.hideError();
+
+    const newUsername = e.target.querySelector("#newUsername").value;
+    const _csrf = e.target.querySelector("#_csrf").value;
+
+    //Step 1: Make sure the user has added a parameter
+    if (!newUsername) {
+        helper.handleError('Missing required parameters!');
+        return false;
+    }
+
+    helper.sendPost(e.target.action, {newUsername, _csrf});
+};
+
 //Render the form for changing the password
 const ChangePassWindow = (props) => {
     return (
@@ -59,15 +75,49 @@ const ChangePassWindow = (props) => {
     );
 };
 
+//Render the form for changing username
+const ChangeUsernameWindow = (props) => {
+    return (
+        <form id="changeUserForm"
+        name="changeUserForm"
+        onSubmit={handleUsernameChange}
+        action="/changeUser"
+        method="POST"
+        className='mainForm'>
+            <div id="changeUsernameHeader">
+                <h2>Change Username:</h2>
+            </div>
+            <label htmlFor="newUsername">New Username: </label>
+            <input id="newUsername" type="text" name="newUsername" placeholder="new username" />
+
+            <input id="_csrf" type="hidden" name="_csrf" value={props.csrf} />
+            <input className="formSubmit" type="submit" value="Submit" />
+        </form>
+    );
+};
+
 const init = async () => {
-    console.log("Rendering changePass Window")
     const response = await fetch('/getToken');
     const data = await response.json();
 
-    ReactDOM.render(
-        <ChangePassWindow csrf={data.csrfToken} />,
-        document.getElementById('changePassword')
-    );
+    const changeUserBtn = document.getElementById('changeUserBtn');
+    const changePassBtn = document.getElementById('changePassBtn');
+
+    changeUserBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        ReactDOM.render(
+            <ChangeUsernameWindow csrf={data.csrfToken} />,
+            document.getElementById('editForm')
+        );
+    });
+
+    changePassBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        ReactDOM.render(
+            <ChangePassWindow csrf={data.csrfToken} />,
+            document.getElementById('editForm')
+        );
+    });
 }
 
 window.onload = init;

@@ -306,7 +306,7 @@ const setupEnemies = async (app, numEnemies) => {
 const loop = (app, player, pickups, enemies) => {
     app.ticker.add(() => {
         //Update the score on the screen
-        scoreDisplay.innerHTML = currentScore;
+        scoreDisplay.innerHTML = `Score: ${currentScore}`;
 
         //Update Player based on input
         playerInput(player);

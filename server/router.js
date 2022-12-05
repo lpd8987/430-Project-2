@@ -22,6 +22,7 @@ const router = (app) => {
 
   // SETTINGS
   app.get('/settings', mid.requiresSecure, mid.requiresLogin, controllers.Account.settingsPage);
+  app.post('/changeUser', mid.requiresSecure, mid.requiresLogin, controllers.Account.changeUser);
   app.post('/changePass', mid.requiresSecure, mid.requiresLogin, controllers.Account.changePass);
 
   // LOGOUT
