@@ -201,26 +201,6 @@ const saveData =  (score) => {
 //#endregion
 
 //#region Setup
-
-const getLeaderboardData = async () => {
-    console.log("getting leaderboard data...");
-    const rawDbData = await fetch("/getLeaderboardData");
-    const dbDataJSON = await rawDbData.json();
-
-    const leaderboardData = [];
-
-    for(const obj of dbDataJSON){
-        const newObj = {};
-    
-        newObj.username = obj.username;
-        newObj.highScore = obj.highScore;
-    
-        leaderboardData.push(newObj);
-    }
-
-    console.log(leaderboardData);
-};
-
 const getPlayerData = async () => {
     console.log("getting player data...")
     const dbData = await fetch("/getCurrentPlayerData");
@@ -363,8 +343,6 @@ const initApp = async (data) => {
     highScoreDisplay = document.getElementById("highScore");
 
     await getPlayerData();
-
-    await getLeaderboardData();
 
     loop(app, playerSprite, pickups, enemies);
 };
