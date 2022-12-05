@@ -10,7 +10,7 @@ const appPage = (req, res) => {
 // Sort DB by score
 const getLeaderboardData = async (req, res) => {
   // Gets data in descending order (highest score first)
-  const sortedData = await Account.find({ }).sort({ highScore: -1 });
+  const sortedData = await Account.find({ }).sort({ highScore: -1 }).exec();
 
   // Return the sorted data for display
   return res.status(200).json(sortedData);
@@ -20,10 +20,8 @@ const getLeaderboardData = async (req, res) => {
 const getCurrentPlayerData = async (req, res) => {
   try {
     const playerUsername = req.session.account.username;
-    console.log(req.session.account);
 
     const playerAccount = await Account.findOne({ username: playerUsername }).exec();
-    console.log(playerAccount);
 
     // Theoretically should not occur if the user is logged in
     if (!playerAccount) {

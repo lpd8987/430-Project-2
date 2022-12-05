@@ -24,6 +24,8 @@ let currentScore = 0;
 let scoreDisplay;
 let highScoreDisplay;
 
+const gameOverEvent = new CustomEvent('gameOver');
+
 //#region Input
 
 //Updates the mouse position
@@ -172,6 +174,9 @@ const respawnCollectible = (app, pickups) => {
 
 //clears the app of all sprites
 const gameOver = (app, player, pickups, enemies) => {
+
+    document.dispatchEvent(gameOverEvent);
+
     //delete player
     app.stage.removeChild(player);
 
@@ -192,21 +197,19 @@ const gameOver = (app, player, pickups, enemies) => {
 
 //Saves current score as high score if it is higher
 const saveData =  (score) => {
-    console.log("IN SAVEDATA in PIXI.JS");
+    //console.log("IN SAVEDATA in PIXI.JS");
     helper.sendPost("/saveScore", {score: score, _csrf: appData.csrfToken});
 };
-
-
 
 //#endregion
 
 //#region Setup
 const getPlayerData = async () => {
-    console.log("getting player data...")
+    //console.log("getting player data...")
     const dbData = await fetch("/getCurrentPlayerData");
     const dbDataJSON = await dbData.json();
 
-    console.log(dbDataJSON);
+    //console.log(dbDataJSON);
 
     if(dbDataJSON){
         highScoreDisplay.innerHTML = `High Score: ${dbDataJSON.highScore}`;
@@ -349,4 +352,4 @@ const initApp = async (data) => {
 
 //#endregion
 
-export { initApp }
+export { gameOverEvent, initApp }

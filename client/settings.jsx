@@ -1,6 +1,6 @@
 const helper = require('./helper.js');
 
-//Handles sending the post request
+//Handles sending the post request to change password
 const handlePasswordChange = (e) => {
     e.preventDefault();
     helper.hideError();
@@ -31,6 +31,7 @@ const handlePasswordChange = (e) => {
     helper.sendPost(e.target.action, {oldPassword, newPassword, newPassword2, _csrf});
 };
 
+//Handles sending post request to change username
 const handleUsernameChange = (e) => {
     e.preventDefault();
     helper.hideError();
@@ -47,6 +48,7 @@ const handleUsernameChange = (e) => {
     helper.sendPost(e.target.action, {newUsername, _csrf});
 };
 
+//REACT Components
 //Render the form for changing the password
 const ChangePassWindow = (props) => {
     return (
