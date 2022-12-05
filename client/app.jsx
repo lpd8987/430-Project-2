@@ -44,7 +44,7 @@ const Leaderboard = (props) => {
    
 
     return (
-        <div id="leaderboard" value={leaderboardData} onChange={(e) => setLeaderboard(e.target.value)}>
+        <div id="leaderboard">
             {leaderboardData}
         </div>
     );
