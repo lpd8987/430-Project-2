@@ -6,7 +6,7 @@ const { Account } = models;
 // RENDER FUNCTIONS//
 // renders the login page
 const loginPage = (req, res) => {
-  if(req.session.account){
+  if (req.session.account) {
     console.log(req.session.account);
   }
   res.render('login', { csrfToken: req.csrfToken() });
@@ -78,7 +78,7 @@ const signup = async (req, res) => {
 const changePass = async (req, res) => {
   // to change their password, the user must type their old password in
   // then then add/retype their new password
-  const username = req.session.account.username;
+  const { username } = req.session.account;
 
   const oldPass = `${req.body.oldPassword}`;
   const newPass = `${req.body.newPassword}`;
@@ -94,8 +94,8 @@ const changePass = async (req, res) => {
     // get a reference to the current account
     const userAccount = await Account.findOne({ username }).exec();
 
-    //If userAccount is not found, throw an error
-    /*Theoretically this should not be triggered if REDIS is working correctly*/
+    // If userAccount is not found, throw an error
+    /* Theoretically this should not be triggered if REDIS is working correctly */
     if (!userAccount) {
       throw new Error();
     }

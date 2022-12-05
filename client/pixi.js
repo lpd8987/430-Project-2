@@ -204,10 +204,21 @@ const saveData =  (score) => {
 
 const getLeaderboardData = async () => {
     console.log("getting leaderboard data...");
-    const dbData = await fetch("/getLeaderboardData");
-    const dbDataJSON = await dbData.json();
+    const rawDbData = await fetch("/getLeaderboardData");
+    const dbDataJSON = await rawDbData.json();
 
-    console.log(dbDataJSON);
+    const leaderboardData = [];
+
+    for(const obj of dbDataJSON){
+        const newObj = {};
+    
+        newObj.username = obj.username;
+        newObj.highScore = obj.highScore;
+    
+        leaderboardData.push(newObj);
+    }
+
+    console.log(leaderboardData);
 };
 
 const getPlayerData = async () => {

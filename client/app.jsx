@@ -11,6 +11,10 @@ const PIXIApp = () => {
     );
 };
 
+/*const Leaderboard = () => {
+
+};*/
+
 //Render the page
 const init = async () => {
     const response = await fetch('/getToken');
