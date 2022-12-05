@@ -5,7 +5,6 @@ const handlePasswordChange = (e) => {
     e.preventDefault();
     helper.hideError();
 
-    const username = e.target.querySelector("#username").value;
     const oldPassword = e.target.querySelector("#oldPassword").value;
     const newPassword = e.target.querySelector("#newPassword").value;
     const newPassword2 = e.target.querySelector("#newPassword2").value;
@@ -29,7 +28,7 @@ const handlePasswordChange = (e) => {
         return false;
     }
 
-    helper.sendPost(e.target.action, {username, oldPassword, newPassword, newPassword2, _csrf});
+    helper.sendPost(e.target.action, {oldPassword, newPassword, newPassword2, _csrf});
 };
 
 //Render the form for changing the password
@@ -45,9 +44,6 @@ const ChangePassWindow = (props) => {
                 <h2>Change Password:</h2>
                 <h3>(Warning: Changing Password will log you out!)</h3>
             </div>
-            <label htmlFor="username">Username: </label>
-            <input id="username" type="text" name="username" placeholder="username" />
-
             <label htmlFor="pass">Old Password: </label>
             <input id="oldPassword" type="password" name="oldPass" placeholder="password" />
 

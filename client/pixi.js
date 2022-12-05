@@ -207,9 +207,9 @@ const getPlayerData = async () => {
     console.log(dbDataJSON);
 
     if(dbDataJSON){
-        highScoreDisplay.innerHTML = dbDataJSON.highScore;
+        highScoreDisplay.innerHTML = `High Score: ${dbDataJSON.highScore}`;
     } else {
-        highScoreDisplay.innerHTML = 0;
+        highScoreDisplay.innerHTML = `High Score: 0`;
     }
 };
 
