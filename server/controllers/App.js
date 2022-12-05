@@ -10,8 +10,21 @@ const appPage = (req, res) => {
 //Sort DB by score
 const getLeaderboardData = async (req, res) => {
   //Gets data in descending order (highest score first)
+  const returnData = [];
   const sortedData = await Account.find({ }).sort( { highScore: -1 } );
-  return res.status(200).json(sortedData);
+
+  //Pull sensitive information out of the data (password, createdAt)
+  for(const obj of sortedData){
+    const newObj = {};
+
+    newObj.username = obj.username;
+    newObj.highScore = obj.highScore;
+
+    returnData.push(newObj);
+  }
+
+  //Return the filtered and sorted data for display
+  return res.status(200).json(returnData);
 };
 
 //GET /getCurrentPlayerData - Returns a JSON object with relevant player information
