@@ -6,6 +6,9 @@ const { Account } = models;
 // RENDER FUNCTIONS//
 // renders the login page
 const loginPage = (req, res) => {
+  if(req.session.account){
+    console.log(req.session.account);
+  }
   res.render('login', { csrfToken: req.csrfToken() });
 };
 
@@ -36,6 +39,7 @@ const login = (req, res) => {
     }
 
     req.session.account = Account.toAPI(account);
+    console.log(req.session.account);
 
     return res.json({ redirect: '/app' });
   });
@@ -91,6 +95,7 @@ const changePass = async (req, res) => {
     const userAccount = await Account.findOne({ username }).exec();
 
     //If userAccount is not found, throw an error
+    /*Theoretically this should not be triggered if REDIS is working correctly*/
     if (!userAccount) {
       throw new Error();
     }

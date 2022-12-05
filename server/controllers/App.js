@@ -7,16 +7,21 @@ const appPage = (req, res) => {
   res.render('app', { csrfToken: req.csrfToken() });
 };
 
-
-//POST /addToLeaderboard - if the player's score is among the top 10 in the leaderboard,
-//save the player's username and score to the leaderboard.
+//Sort DB by score
+const getLeaderboardData = async (req, res) => {
+  //Gets data in descending order (highest score first)
+  const sortedData = await Account.find({ }).sort( { highScore: -1 } );
+  return res.status(200).json(sortedData);
+};
 
 //GET /getCurrentPlayerData - Returns a JSON object with relevant player information
 const getCurrentPlayerData = async (req, res) => {
   try {
-    const playerUsername = req.session.account;
+    const playerUsername = req.session.account.username;
+    console.log(req.session.account);
 
-    const playerAccount = await Account.findOne({ playerUsername }).exec();
+    const playerAccount = await Account.findOne({"username": playerUsername }).exec();
+    console.log(playerAccount);
 
     //Theoretically should not occur if the user is logged in
     if(!playerAccount) {
@@ -42,7 +47,7 @@ const getPlayerData = async (req, res) => {
   try {
     const playerUsername = req.body.username;
 
-    const playerAccount = await Account.findOne({ playerUsername }).exec();
+    const playerAccount = await Account.findOne({"username": playerUsername }).exec();
 
     //Theoretically should not occur if the user is logged in
     if(!playerAccount) {
@@ -64,9 +69,9 @@ const getPlayerData = async (req, res) => {
 //POST /saveScore - save the player's score when they die in the game
 const saveScore = async (req, res) => {
   try {
-    const playerUsername = req.session.account;
+    const playerUsername = req.session.account.username;
 
-    const playerAccount = await Account.findOne({ playerUsername }).exec();
+    const playerAccount = await Account.findOne({"username": playerUsername }).exec();
 
     //Theoretically should not occur if the user is logged in
     if(!playerAccount) {
@@ -95,5 +100,6 @@ module.exports = {
   appPage,
   saveScore,
   getCurrentPlayerData,
-  getPlayerData
+  getPlayerData,
+  getLeaderboardData
 }

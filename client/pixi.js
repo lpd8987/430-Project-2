@@ -1,4 +1,5 @@
 //This file handles all logic for the game within the React App//
+//This includes GET and POST requests to the server where necessary//
 const helper = require("./helper.js");
 import * as PIXI from './pixiModule.js';
 
@@ -195,12 +196,22 @@ const saveData =  (score) => {
     helper.sendPost("/saveScore", {score: score, _csrf: appData.csrfToken});
 };
 
+
+
 //#endregion
 
 //#region Setup
 
-//RETURNS A SPRITE OBJECT IN THE SCENE//
+const getLeaderboardData = async () => {
+    console.log("getting leaderboard data...");
+    const dbData = await fetch("/getLeaderboardData");
+    const dbDataJSON = await dbData.json();
+
+    console.log(dbDataJSON);
+};
+
 const getPlayerData = async () => {
+    console.log("getting player data...")
     const dbData = await fetch("/getCurrentPlayerData");
     const dbDataJSON = await dbData.json();
 
@@ -213,10 +224,7 @@ const getPlayerData = async () => {
     }
 };
 
-/*const getMultiplayerData = async () => {
-
-};*/
-
+//RETURNS A SPRITE OBJECT IN THE SCENE//
 const setupPlayer = async (app) => {
     //Sprite Setup
     const texture = await PIXI.Assets.load('/assets/img/topDownSprite.png');
@@ -319,6 +327,7 @@ const loop = (app, player, pickups, enemies) => {
 
 //Create the app and begin the render loop
 const initApp = async (data) => {
+    console.log("Starting app...")
     appData = data;
 
     const app = new PIXI.Application();
@@ -343,6 +352,8 @@ const initApp = async (data) => {
     highScoreDisplay = document.getElementById("highScore");
 
     await getPlayerData();
+
+    await getLeaderboardData();
 
     loop(app, playerSprite, pickups, enemies);
 };
