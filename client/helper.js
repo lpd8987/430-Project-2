@@ -1,9 +1,15 @@
 // CODE REUSED FROM PREVIOUS HW ASSIGNMENT (WITH NEW COMMENTS + ALTERED CONTENT)//
 //Displays error message as text the user can see on-screen
-const handleError = (message) => {
+const handleError = (message, elements) => {
     let errorMessageElement = document.getElementById('errorMessage');
+
+    for(const elementString of elements){
+      const el = document.getElementById(`${elementString}`);
+      el.classList.add("is-danger");
+    }
+
     errorMessageElement.textContent = message;
-    errorMessageElement.classList.remove('hidden');
+    errorMessageElement.style.display = 'block';
 };
 
 /* Sends post requests to the server using fetch. Will look for various
@@ -22,7 +28,7 @@ const sendPost = async (url, data, handler) => {
     const result = await response.json();
 
     if(result.error) {
-      handleError(result.error);
+      handleError(result.error, []);
     }
 
     if(result.redirect) {
@@ -35,8 +41,13 @@ const sendPost = async (url, data, handler) => {
 };
 
 //Hide error messages
-const hideError = () => {
-    document.getElementById('errorMessage').classList.add('hidden');
+const hideError = (elements) => {
+    document.getElementById('errorMessage').style.display = 'none';
+
+    for(const elementString of elements){
+      const el = document.getElementById(`${elementString}`);
+      el.classList.remove("is-danger");
+    }
 };
 
 module.exports = {

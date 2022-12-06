@@ -6,13 +6,18 @@
     <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma-rtl.min.css">
+    <link rel="stylesheet" href="/assets/appStyle.css">
 </head>
-<body>
-    <button id="loginButton">Login</button>
-    <button id="signupButton">Signup</button>
-
-    <h2 id="errorMessage" class="hidden"></h2>
+<body id="loginBody">
     <div id="content"></div>
+
+    <h2 id="errorMessage" class="hidden has-text-danger-dark is-size-5 has-text-weight-bold"></h2>
+
+    <div id="controls">
+        <button class="button is-success" id="loginButton">Login</button>
+        <button class="button" id="signupButton">Signup</button>
+    </div>
     <script src="/assets/loginBundle.js"></script>
 </body>
 </html>

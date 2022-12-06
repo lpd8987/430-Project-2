@@ -3,15 +3,18 @@ const helper = require('./helper.js');
 
 //Event handlers
 const handleLogin = (e) => {
-    e.preventDefault();
-    helper.hideError();
+    const elementIds = ['user', 'pass'];
 
+    e.preventDefault();
+    helper.hideError(elementIds);
+
+    
     const username = e.target.querySelector("#user").value;
     const pass = e.target.querySelector("#pass").value;
     const _csrf = e.target.querySelector("#_csrf").value;
 
     if(!username || !pass) {
-        helper.handleError('Username or password is empty!');
+        helper.handleError('Username or password is empty!', elementIds);
         return false;
     }
 
@@ -21,8 +24,10 @@ const handleLogin = (e) => {
 };
 
 const handleSignup = (e) => {
+    const elementIds = ['user', 'pass', 'pass2'];
+
     e.preventDefault();
-    helper.hideError();
+    helper.hideError(elementIds);
 
     const username = e.target.querySelector('#user').value;
     const pass = e.target.querySelector('#pass').value;
@@ -30,12 +35,12 @@ const handleSignup = (e) => {
     const _csrf = e.target.querySelector("#_csrf").value;
 
     if(!username || !pass || !pass2) {
-        helper.handleError('All fields are required!');
+        helper.handleError('All fields are required!', elementIds);
         return false;
     }
 
     if (pass !== pass2) {
-        helper.handleError('Passwords do not match');
+        helper.handleError('Passwords do not match', elementIds);
         return false;
     }
 
@@ -52,14 +57,18 @@ const LoginWindow = (props) => {
             onSubmit={handleLogin}
             action="/login"
             method="POST"
-            className="mainForm"
+            className="mainForm box"
         >
-            <label htmlFor="username">Username: </label>
-            <input id="user" type="text" name="username" placeholder="username" />
-            <label htmlFor="pass">Password: </label>
-            <input id="pass" type="password" name="pass" placeholder="password" />
+            <h3 className="title is-3"><u>Login</u></h3>
+            <label className="label" htmlFor="username">Username: </label>
+            <input className="input" id="user" type="text" name="username" placeholder="username" />
+
+            <label className="label" htmlFor="pass">Password: </label>
+            <input className="input" id="pass" type="password" name="pass" placeholder="password" />
+
             <input id="_csrf" type="hidden" name="_csrf" value={props.csrf} />
-            <input className="formSubmit" type="submit" value="Sign in" />
+
+            <input className="formSubmit button mt-3 is-success" type="submit" value="Sign in" />
         </form>
     );
 };
@@ -72,16 +81,21 @@ const SignupWindow = (props) => {
         onSubmit={handleSignup}
         action="/signup"
         method="POST"
-        className="mainForm"
+        className="mainForm box"
         >
-            <label htmlFor="username">Username: </label>
-            <input id="user" type="text" name="username" placeholder="username" />
-            <label htmlFor="pass">Password: </label>
-            <input id="pass" type="password" name="pass" placeholder="password" />
-            <label htmlFor="pass2">Password: </label>
-            <input id="pass2" type="password" name="pass2" placeholder="retype password" />
+            <h3 className="title is-3"><u>Signup</u></h3>
+            <label className="label" htmlFor="username">Username: </label>
+            <input className="input" id="user" type="text" name="username" placeholder="username" />
+
+            <label className="label" htmlFor="pass">Password: </label>
+            <input className="input" id="pass" type="password" name="pass" placeholder="password" />
+
+            <label className="label" htmlFor="pass2">Retype Password: </label>
+            <input className="input" id="pass2" type="password" name="pass2" placeholder="retype password" />
+
             <input id="_csrf" type="hidden" name="_csrf" value={props.csrf} />
-            <input className="formSubmit" type="submit" value="Sign in" />
+
+            <input className="formSubmit button mt-3 is-success" type="submit" value="Signup" />
         </form>
     );
 };
@@ -97,15 +111,26 @@ const init = async () => {
 
     loginButton.addEventListener('click', (e) => {
         e.preventDefault();
+        helper.hideError([]);
         ReactDOM.render(<LoginWindow csrf={data.csrfToken} />,
             document.getElementById('content'));
+
+        loginButton.classList.add('is-success');
+        signupButton.classList.remove('is-success');
+
         return false;
     });
 
     signupButton.addEventListener('click', (e) => {
         e.preventDefault();
+        helper.hideError([]);
+
         ReactDOM.render(<SignupWindow csrf={data.csrfToken} />,
             document.getElementById('content'));
+
+        loginButton.classList.remove('is-success');
+        signupButton.classList.add('is-success');
+
         return false;
     });
 
