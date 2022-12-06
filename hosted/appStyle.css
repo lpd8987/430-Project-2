@@ -21,3 +21,9 @@
     left: 50%;
     transform: translate(-50%, -50%);
 }
+
+.navbar-end {
+    justify-content: flex-end;
+    margin-left: auto;
+    margin-right: 0%;
+}
