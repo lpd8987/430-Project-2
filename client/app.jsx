@@ -28,17 +28,16 @@ const Leaderboard = (props) => {
     //If the database has data in it
     const leaderboardData = props.players.map((player) => {
         return (
-            <li key={player.username}>
+            <li className="m-5 is-size-4" key={player.username}>
                 <strong>{player.username}</strong> - {player.highScore}
             </li>
         );
     });
-   
 
     return (
         <div id="leaderboard">
-            <h2><u>Leaderboard</u></h2>
-            <ol>
+            <h2 className="title">Leaderboard</h2>
+            <ol className="content">
                 {leaderboardData}
             </ol>
         </div>
@@ -49,8 +48,8 @@ const Leaderboard = (props) => {
 const HowToPlay = () => {
     return (
         <div id="howToPlay">
-            <h2><u>How To Play:</u></h2>
-            <ul>
+            <h2 className="title"><u>How To Play:</u></h2>
+            <ul className="content">
                 <li>Use WASD keys to move.</li>
                 <li>Avoid monsters and gather as many collectibles as you can!</li>
             </ul>
@@ -95,12 +94,20 @@ const init = async () => {
 
     showLeaderboardBtn.addEventListener('click', async (e) => {
         e.preventDefault();
+
+        showLeaderboardBtn.classList.add('is-success');
+        howToPlayBtn.classList.remove('is-success');
+
         await refreshLeaderboardData();
     });
 
     howToPlayBtn.addEventListener('click', (e) => {
         leaderboardActive = false;
         e.preventDefault();
+
+        showLeaderboardBtn.classList.remove('is-success');
+        howToPlayBtn.classList.add('is-success');
+
         ReactDOM.render(
             <HowToPlay csrf={data.csrfToken} />,
             document.getElementById('secondaryContent')

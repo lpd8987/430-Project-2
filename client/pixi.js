@@ -150,6 +150,30 @@ const checkCollisions = (app, player, pickups, enemies) => {
     }
 };
 
+/*This function is adapted from the code by "user4205678" on StackOverflow
+that lets an object follow another- in this case i'm using it for enemies
+Link: https://stackoverflow.com/questions/27533331/problems-making-enemy-follow-moving-player*/
+const followPlayer = (enemies, player) => 
+{
+    //Make sure there are actually enemies to chase the player
+    if(enemies.length < 1){
+        return;
+    }
+
+    //Have each enemy move toward the player
+    for(const enemy of enemies) {
+        //Calculate distances + angles
+        const xDistance = player.x - enemy.x;
+        const yDistance = player.y - enemy.y;
+        const distance = Math.sqrt((xDistance * xDistance) + (yDistance * yDistance));
+
+        //Adjust enemy properties accordingly
+        enemy.angle = Math.atan2(yDistance, xDistance) * 180 / Math.PI;
+        enemy.x += Math.floor(Math.random() * 6) * (xDistance / distance);
+        enemy.y += Math.floor(Math.random() * 6) * (yDistance / distance);
+    }
+}
+
 //Spawns a new collectible (assumes that the texture has already been loaded)
 const respawnCollectible = (app, pickups) => {
     //Make sure the texture has already been loaded
@@ -162,8 +186,8 @@ const respawnCollectible = (app, pickups) => {
  
     pickupSprite.scale = {x:0.1, y:0.1};
 
-    pickupSprite.x = Math.floor(Math.random() * app.renderer.width);
-    pickupSprite.y = Math.floor(Math.random() * app.renderer.height);
+    pickupSprite.x = Math.floor(Math.random() * (app.renderer.width - 100));
+    pickupSprite.y = Math.floor(Math.random() * (app.renderer.height - 100));
 
     pickupSprite.anchor.x = 0.5;
     pickupSprite.anchor.y = 0.5;
@@ -241,10 +265,10 @@ const setupPlayer = async (app) => {
 const setupBackground = async (app) => {
     //Background is its own sprite
     const bgTex = await PIXI.Assets.load('/assets/img/darkBackground.jpg');
-    const bg = new PIXI.Sprite(bgTex);
+    const bg = new PIXI.TilingSprite(bgTex, window.innerWidth, window.innerHeight);
 
     //Edit background properties
-    bg.scale = {x: 2, y: 2};
+    bg.position.set(0,0);
     bg.interactive = true;
     bg.on("mousemove", getMousePosition);
 
@@ -265,8 +289,8 @@ const setupCollectibles = async (app, numCollectibles) => {
  
         pickupSprite.scale = {x:0.1, y:0.1};
     
-        pickupSprite.x = Math.floor(Math.random() * app.renderer.width);
-        pickupSprite.y = Math.floor(Math.random() * app.renderer.width);
+        pickupSprite.x = Math.floor(Math.random() * (app.renderer.width - 100));
+        pickupSprite.y = Math.floor(Math.random() * (app.renderer.height - 100));
 
         pickupSprite.anchor.x = 0.5;
         pickupSprite.anchor.y = 0.5;
@@ -288,8 +312,8 @@ const setupEnemies = async (app, numEnemies) => {
  
         enemySprite.scale = {x:0.1, y:0.1};
     
-        enemySprite.x = Math.floor(Math.random() * app.renderer.width);
-        enemySprite.y = Math.floor(Math.random() * app.renderer.width);
+        enemySprite.x = Math.floor(Math.random() * (app.renderer.width - 100));
+        enemySprite.y = Math.floor(Math.random() * (app.renderer.height - 100));
 
         enemySprite.anchor.x = 0.5;
         enemySprite.anchor.y = 0.5;
@@ -314,8 +338,12 @@ const loop = (app, player, pickups, enemies) => {
         //Update Player based on input
         playerInput(player);
 
+        //Have enemies follow the player
+        followPlayer(enemies, player);
+
         //Check for Collisions
         checkCollisions(app, player, pickups, enemies);
+
     });
 };
 
@@ -324,7 +352,7 @@ const initApp = async (data) => {
     console.log("Starting app...")
     appData = data;
 
-    const app = new PIXI.Application();
+    const app = new PIXI.Application({ width: window.innerWidth, height: 600 });
     document.getElementById('gameArea').appendChild(app.view);
 
     //Draw Order: Background, Player, Pickups, Enemies;
