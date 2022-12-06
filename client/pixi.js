@@ -4,10 +4,16 @@ const helper = require("./helper.js");
 import * as PIXI from './pixiModule.js';
 
 //Data from the React Component
-let appData;
+let appData = null;
 
 //Declare the variable so that after the texture is loaded, it can be reused.
-let pickupTex;
+let playerTex = null;
+let pickupTex = null;
+let enemyTex = null;
+
+let player = null;
+let pickups = null;
+let enemies = null;
 
 //Bools that are tied to input
 let leftInputPressed = false;
@@ -22,10 +28,11 @@ const mousePosition = {x: 0, y: 0}
 let currentScore = 0;
 let highScore = 0;
 
-let scoreDisplay;
-let highScoreDisplay;
+let scoreDisplay = null;
+let highScoreDisplay = null;
 
 const gameOverEvent = new CustomEvent('gameOver');
+let gameFinished = false;
 
 const music = new Audio('/assets/sound/game-theme.mp3');
 const defaultPickup = new Audio('/assets/sound/pickup.mp3');
@@ -38,6 +45,7 @@ const getMousePosition = (e) => {
     mousePosition.x = e.data.global.x;
     mousePosition.y = e.data.global.y;
 };
+
 
 //Player input
 const playerInput = (player) => {
@@ -64,7 +72,7 @@ const playerInput = (player) => {
 };
 
 //Sets up the key events that will be tied to game functions
-const setupInputEvents = () => {
+const setupInputEvents = (app) => {
     //Keydown
     document.onkeydown = (e) => {
         switch(e.key)
@@ -80,6 +88,11 @@ const setupInputEvents = () => {
                 break;
             case 'w':
                 topInputPressed = true;
+                break;
+            case 'Enter':
+                if(gameFinished){
+                    resetGame(app);
+                }
                 break;
         }
     };
@@ -128,17 +141,17 @@ const AABBCollision = (a, b) => {
 };
 
 //Checks whether a player is in contact with an interactable object
-const checkCollisions = (app, player, pickups, enemies) => {
-    if(!player || pickups.length < 1 || !enemies) {
+const checkCollisions = (app, playerSprite, pickupSprites, enemySprites) => {
+    if(!playerSprite || pickupSprites.length < 1 || !enemySprites) {
         return;
     }
 
     //Check Player against each Pickup
-    for(let i = 0; i < pickups.length; i++) {
-        if(AABBCollision(player, pickups[i])) {
+    for(let i = 0; i < pickupSprites.length; i++) {
+        if(AABBCollision(playerSprite, pickupSprites[i])) {
             //Remove the sprite from the game and array
-            app.stage.removeChild(pickups[i]);
-            pickups.splice(i, 1);
+            app.stage.removeChild(pickupSprites[i]);
+            pickupSprites.splice(i, 1);
 
             //Increment Score
             currentScore++;
@@ -156,14 +169,14 @@ const checkCollisions = (app, player, pickups, enemies) => {
             //console.log(`Pickup acquired! Current Score: ${currentScore}`);
 
             //Add a new collectible to make up for the destroyed one
-            respawnCollectible(app, pickups);
+            respawnCollectible(app, pickupSprites);
         }
     }
 
     //TODO: Check Player against each Enemy
-    for(const enemy of enemies) {
-        if(AABBCollision(player, enemy)) {
-            gameOver(app, player, pickups, enemies);
+    for(const enemy of enemySprites) {
+        if(AABBCollision(playerSprite, enemy)) {
+            gameOver(app, playerSprite, pickupSprites, enemySprites);
             return;
         }
     }
@@ -172,18 +185,18 @@ const checkCollisions = (app, player, pickups, enemies) => {
 /*This function is adapted from the code by "user4205678" on StackOverflow
 that lets an object follow another- in this case i'm using it for enemies
 Link: https://stackoverflow.com/questions/27533331/problems-making-enemy-follow-moving-player*/
-const followPlayer = (enemies, player) => 
+const followPlayer = (enemySprites, playerSprite) => 
 {
     //Make sure there are actually enemies to chase the player
-    if(enemies.length < 1){
+    if(enemySprites.length < 1){
         return;
     }
 
     //Have each enemy move toward the player
-    for(const enemy of enemies) {
+    for(const enemy of enemySprites) {
         //Calculate distances + angles
-        const xDistance = player.x - enemy.x;
-        const yDistance = player.y - enemy.y;
+        const xDistance = playerSprite.x - enemy.x;
+        const yDistance = playerSprite.y - enemy.y;
         const distance = Math.sqrt((xDistance * xDistance) + (yDistance * yDistance));
 
         //Adjust enemy properties accordingly
@@ -194,7 +207,7 @@ const followPlayer = (enemies, player) =>
 }
 
 //Spawns a new collectible (assumes that the texture has already been loaded)
-const respawnCollectible = (app, pickups) => {
+const respawnCollectible = (app, pickupSprites) => {
     //Make sure the texture has already been loaded
     if (!pickupTex) {
         return;
@@ -212,12 +225,13 @@ const respawnCollectible = (app, pickups) => {
     pickupSprite.anchor.y = 0.5;
 
     app.stage.addChild(pickupSprite);
-    pickups.push(pickupSprite);
+    pickupSprites.push(pickupSprite);
 };
 
 //clears the app of all sprites
-const gameOver = (app, player, pickups, enemies) => {
+const gameOver = (app, playerSprite, pickupSprites, enemySprites) => {
 
+    gameFinished = true;
     document.dispatchEvent(gameOverEvent);
 
     //Update Display information before saving to database
@@ -227,19 +241,24 @@ const gameOver = (app, player, pickups, enemies) => {
     }
 
     //delete player
-    app.stage.removeChild(player);
+    app.stage.removeChild(playerSprite);
 
     //delete pickups
-    for(let i = 0; i < pickups.length; i++){
-        app.stage.removeChild(pickups[i]);
-        pickups.splice(i, 1);
+    for(let i = 0; i < pickupSprites.length; i++){
+        app.stage.removeChild(pickupSprites[i]);
+        pickupSprites.splice(i, 1);
+        i--;
     }
 
     //delete enemies
-    for(let i = 0; i < enemies.length; i++){
-        app.stage.removeChild(enemies[i]);
-        enemies.splice(i, 1);
+    for(let i = 0; i < enemySprites.length; i++){
+        app.stage.removeChild(enemySprites[i]);
+        enemySprites.splice(i, 1);
+        i--;
     }
+
+    console.log(pickups.length);
+    console.log(enemies.length);
 
     saveData(currentScore);
 };
@@ -271,8 +290,10 @@ const getPlayerData = async () => {
 //RETURNS A SPRITE OBJECT IN THE SCENE//
 const setupPlayer = async (app) => {
     //Sprite Setup
-    const texture = await PIXI.Assets.load('/assets/img/topDownSprite.png');
-    const playerSprite = new PIXI.Sprite(texture);
+    if(!playerTex){
+        playerTex = await PIXI.Assets.load('/assets/img/topDownSprite.png');
+    }
+    const playerSprite = new PIXI.Sprite(playerTex);
 
     //Properties
     playerSprite.scale = {x:0.3, y:0.3};
@@ -308,7 +329,9 @@ const setupCollectibles = async (app, numCollectibles) => {
      const pickups = [];
 
      //only load the pickup texture once
-     pickupTex = await PIXI.Assets.load('/assets/img/coin.png');
+     if(!pickupTex){
+        pickupTex = await PIXI.Assets.load('/assets/img/coin.png');
+     }
 
      for (let i = 0; i < numCollectibles; i++) {
         const pickupSprite = new PIXI.Sprite(pickupTex);
@@ -331,7 +354,10 @@ const setupCollectibles = async (app, numCollectibles) => {
 const setupEnemies = async (app, numEnemies) => {
     const enemies  = [];
 
-    const enemyTex = await PIXI.Assets.load('/assets/img/monster.jpg');
+    //Only load enemy texture in once
+    if(!enemyTex){
+        enemyTex = await PIXI.Assets.load('/assets/img/monster.jpg');
+    }
 
     for (let i = 0; i <= numEnemies; i++) {
         const enemySprite = new PIXI.Sprite(enemyTex);
@@ -351,25 +377,38 @@ const setupEnemies = async (app, numEnemies) => {
      return enemies;
 };
 
+const resetGame = async (app) => {
+    player = await setupPlayer(app);
+    pickups = await setupCollectibles(app, 2);
+    enemies = await setupEnemies(app, 1);
+
+    gameFinished = false;
+
+    await getPlayerData();
+
+    loop(app, player, pickups, enemies);
+}
+
 //#endregion
 
 //#region Main Methods
 
 //Render/Game loop
-const loop = (app, player, pickups, enemies) => {
+const loop = (app, playerSprite, pickupSprites, enemySprites) => {
     app.ticker.add(() => {
-        //Update the score on the screen
-        scoreDisplay.innerHTML = `Score: ${currentScore}`;
+        if(!gameFinished){
+            //Update the score on the screen
+            scoreDisplay.innerHTML = `Score: ${currentScore}`;
 
-        //Update Player based on input
-        playerInput(player);
+            //Update Player based on input
+            playerInput(playerSprite);
 
-        //Have enemies follow the player
-        followPlayer(enemies, player);
+            //Have enemies follow the player
+            followPlayer(enemySprites, playerSprite);
 
-        //Check for Collisions
-        checkCollisions(app, player, pickups, enemies);
-
+            //Check for Collisions
+            checkCollisions(app, playerSprite, pickupSprites, enemySprites);
+        }
     });
 };
 
@@ -385,16 +424,16 @@ const initApp = async (data) => {
     await setupBackground(app);
 
     //Player Object
-    const playerSprite = await setupPlayer(app);
+    player = await setupPlayer(app);
 
     //Pickups
-    const pickups = await setupCollectibles(app, 3);
+    pickups = await setupCollectibles(app, 3);
 
     //Enemies
-    const enemies = await setupEnemies(app, 1);
+    enemies = await setupEnemies(app, 1);
 
     //Complete setup and start loop
-    setupInputEvents();
+    setupInputEvents(app);
 
     scoreDisplay = document.getElementById('score');
     highScoreDisplay = document.getElementById("highScore");
@@ -403,7 +442,7 @@ const initApp = async (data) => {
 
     music.loop = true;
 
-    loop(app, playerSprite, pickups, enemies);
+    loop(app, player, pickups, enemies);
 };
 
 //#endregion
