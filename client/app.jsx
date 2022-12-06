@@ -44,6 +44,18 @@ const Leaderboard = (props) => {
     );
 };
 
+const GameSettings = (props) => {
+    return (
+        <div>
+            <label htmlFor="musicSlider">Music Volume</label>
+            <input name="musicSlider" type="range" min="0" max="100" defaultValue={props.music.volume * 100} id="musicVolumeSlider"></input>
+
+            <label htmlFor="sfxSlider">SFX Volume</label>
+            <input name="sfxSlider" type="range" min="0" max="100" defaultValue={props.sfx[0].volume * 100} id="sfxVolumeSlider"></input>
+        </div>
+    );
+}
+
 //Content instructing the player how to play the game
 const HowToPlay = () => {
     return (
@@ -80,6 +92,7 @@ const init = async () => {
 
     const showLeaderboardBtn = document.getElementById('leaderboardBtn');
     const howToPlayBtn = document.getElementById('howToPlayBtn');
+    const gameSettingsBtn = document.getElementById('gameSettingsBtn');
 
 
     //EVENT LISTENERS
@@ -92,26 +105,54 @@ const init = async () => {
         }
     });
 
+    //SHOW/UPDATE LEADERBOARD BTN
     showLeaderboardBtn.addEventListener('click', async (e) => {
         e.preventDefault();
 
         showLeaderboardBtn.classList.add('is-success');
         howToPlayBtn.classList.remove('is-success');
+        gameSettingsBtn.classList.remove('is-success');
 
         await refreshLeaderboardData();
     });
 
+    //INSTRUCTIONAL COMPONENT
     howToPlayBtn.addEventListener('click', (e) => {
         leaderboardActive = false;
         e.preventDefault();
 
         showLeaderboardBtn.classList.remove('is-success');
         howToPlayBtn.classList.add('is-success');
+        gameSettingsBtn.classList.remove('is-success');
 
         ReactDOM.render(
             <HowToPlay csrf={data.csrfToken} />,
             document.getElementById('secondaryContent')
             );
+    });
+
+    //GAME SETTINGS COMPONENT
+    gameSettingsBtn.addEventListener('click', (e) => {
+        leaderboardActive = false;
+        e.preventDefault();
+
+        showLeaderboardBtn.classList.remove('is-success');
+        howToPlayBtn.classList.remove('is-success');
+        gameSettingsBtn.classList.add('is-success');
+
+        ReactDOM.render(
+            <GameSettings csrf={data.csrfToken} music={PIXI.music} sfx={[PIXI.defaultPickup, PIXI.highScoreNotification]}/>,
+            document.getElementById('secondaryContent')
+            );
+
+        document.getElementById('musicVolumeSlider').addEventListener('change', () => {
+            PIXI.music.volume = document.getElementById('musicVolumeSlider').value / 100;
+        })
+
+        document.getElementById('sfxVolumeSlider').addEventListener('change', () => {
+            PIXI.defaultPickup.volume = document.getElementById('sfxVolumeSlider').value / 100;
+            PIXI.highScoreNotification.volume = document.getElementById('sfxVolumeSlider').value / 100;
+        })
     });
 
     //INITIAL REACT DOM COMPONENTS
@@ -121,7 +162,7 @@ const init = async () => {
         );
 
     ReactDOM.render(
-        <HowToPlay csrf={data.csrfToken} />,
+        <HowToPlay csrf={data.csrfToken}/>,
         document.getElementById('secondaryContent')
         );
 

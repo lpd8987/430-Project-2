@@ -20,11 +20,16 @@ const mousePosition = {x: 0, y: 0}
 
 //The score for the current game session
 let currentScore = 0;
+let highScore = 0;
 
 let scoreDisplay;
 let highScoreDisplay;
 
 const gameOverEvent = new CustomEvent('gameOver');
+
+const music = new Audio('/assets/sound/game-theme.mp3');
+const defaultPickup = new Audio('/assets/sound/pickup.mp3');
+const highScoreNotification = new Audio('/assets/sound/new-high-score.mp3');
 
 //#region Input
 
@@ -48,6 +53,11 @@ const playerInput = (player) => {
     }
     if(bottomInputPressed){
         player.y += 5;
+    }
+
+    if((leftInputPressed || rightInputPressed || topInputPressed || bottomInputPressed) &&
+    music.currentTime === 0){
+        music.play();
     }
 
     player.rotation = Math.atan2((mousePosition.y - player.y), (mousePosition.x - player.x));
@@ -133,6 +143,15 @@ const checkCollisions = (app, player, pickups, enemies) => {
             //Increment Score
             currentScore++;
 
+            //Play sound effect
+            if(currentScore - highScore === 1){
+                highScoreNotification.currentTime = 0;
+                highScoreNotification.play();
+            } else {
+                defaultPickup.currentTime = 0;
+                defaultPickup.play();
+            }
+
             //FOR DEBUG PURPOSES
             //console.log(`Pickup acquired! Current Score: ${currentScore}`);
 
@@ -201,6 +220,12 @@ const gameOver = (app, player, pickups, enemies) => {
 
     document.dispatchEvent(gameOverEvent);
 
+    //Update Display information before saving to database
+    if(currentScore > highScore){
+        highScore = currentScore;
+        highScore.innerHTML = `NEW HIGH SCORE: ${highScore}`;
+    }
+
     //delete player
     app.stage.removeChild(player);
 
@@ -236,9 +261,10 @@ const getPlayerData = async () => {
     //console.log(dbDataJSON);
 
     if(dbDataJSON){
-        highScoreDisplay.innerHTML = `High Score: ${dbDataJSON.highScore}`;
+        highScore = dbDataJSON.highScore;
+        highScoreDisplay.innerHTML = `High Score: ${highScore}`;
     } else {
-        highScoreDisplay.innerHTML = `High Score: 0`;
+        highScoreDisplay.innerHTML = `High Score: ${highScore}`;
     }
 };
 
@@ -349,7 +375,7 @@ const loop = (app, player, pickups, enemies) => {
 
 //Create the app and begin the render loop
 const initApp = async (data) => {
-    console.log("Starting app...")
+    //console.log("Starting app...")
     appData = data;
 
     const app = new PIXI.Application({ width: window.innerWidth, height: 600 });
@@ -375,9 +401,11 @@ const initApp = async (data) => {
 
     await getPlayerData();
 
+    music.loop = true;
+
     loop(app, playerSprite, pickups, enemies);
 };
 
 //#endregion
 
-export { gameOverEvent, initApp }
+export { gameOverEvent, initApp, music, defaultPickup, highScoreNotification }
