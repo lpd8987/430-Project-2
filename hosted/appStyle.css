@@ -43,3 +43,15 @@ li {
     width: 20vw;
     margin: 5px;
 }
+
+#adSpace {
+    display: flex;
+    gap: 20px;
+    margin: 15px;
+    justify-content: center;
+}
+
+.image {
+    min-width: 300px;
+    min-height: 250px;
+}
