@@ -32,6 +32,9 @@ const router = (app) => {
 
   // DEFAULT
   app.get('/', mid.requiresSecure, mid.requiresLogout, controllers.Account.loginPage);
+
+  // 404 RESULT NOT FOUND
+  app.get('*', mid.requiresSecure, controllers.App.notFoundPage);
 };
 
 module.exports = router;

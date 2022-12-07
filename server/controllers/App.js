@@ -7,6 +7,10 @@ const appPage = (req, res) => {
   res.render('app', { csrfToken: req.csrfToken() });
 };
 
+const notFoundPage = (req, res) => {
+  res.render('notFound', { csrfToken: req.csrfToken() });
+};
+
 // Sort DB by score
 const getLeaderboardData = async (req, res) => {
   // Gets data in descending order (highest score first)
@@ -95,6 +99,7 @@ const saveScore = async (req, res) => {
 
 module.exports = {
   appPage,
+  notFoundPage,
   saveScore,
   getCurrentPlayerData,
   getPlayerData,
