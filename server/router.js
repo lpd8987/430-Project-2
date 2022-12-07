@@ -24,6 +24,8 @@ const router = (app) => {
   app.get('/settings', mid.requiresSecure, mid.requiresLogin, controllers.Account.settingsPage);
   app.post('/changeUser', mid.requiresSecure, mid.requiresLogin, controllers.Account.changeUser);
   app.post('/changePass', mid.requiresSecure, mid.requiresLogin, controllers.Account.changePass);
+  app.post('/deleteAccount', mid.requiresSecure, mid.requiresLogin, controllers.Account.deleteAccount);
+  app.post('/resetHighScore', mid.requiresSecure, mid.requiresLogin, controllers.Account.resetHighScore);
 
   // LOGOUT
   app.get('/logout', mid.requiresLogin, controllers.Account.logout);

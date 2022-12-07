@@ -102,7 +102,7 @@ const changePass = async (req, res) => {
     // update the entry in the database
     await userAccount.save();
 
-    return res.status(201).json({ redirect: '/logout' });
+    return res.status(200).json({ redirect: '/logout' });
   } catch (err) {
     console.log(err);
     return res.status(400).json({ error: 'An error occured.' });
@@ -157,6 +157,60 @@ const changeUser = async (req, res) => {
   }
 };
 
+//Very similar code to login, but this time it requires the user's credentials to go about deleting their account altogether
+const deleteAccount = async(req, res) => {
+  const username = `${req.body.username}`;
+  const pass = `${req.body.pass}`;
+
+  //Check for all params
+  if (!username || !pass) {
+    return res.status(400).json({ error: 'All fields are required!' });
+  }
+
+  //Make sure credentials pass
+  Account.authenticate(username, pass, (err, account) => {
+    if (err || !account) {
+      return res.status(401).json({ error: 'Wrong username or password!' });
+    }
+  });
+
+  try{
+    await Account.deleteOne({ "username": username }).exec();
+    return res.status(200).json({ redirect: '/logout' });
+  }catch (err) {
+    console.log(err);
+    return res.status(400).json({ error: 'An error occured.' });
+  }
+};
+
+//Again, very similar code to login, but this time it resets player high score
+const resetHighScore = async(req, res) => {
+  const username = `${req.body.username}`;
+  const pass = `${req.body.pass}`;
+
+  //Check for all params
+  if (!username || !pass) {
+    return res.status(400).json({ error: 'All fields are required!' });
+  }
+
+  //Make sure credentials pass
+  Account.authenticate(username, pass, (err, account) => {
+    if (err || !account) {
+      return res.status(401).json({ error: 'Wrong username or password!' });
+    }
+  });
+
+  try{
+    const userAccount = await Account.findOne({ "username": username }).exec();
+    userAccount.highScore = 0;
+    await userAccount.save();
+    return res.status(200).json({message: "Account data updated."})
+
+  }catch (err) {
+    console.log(err);
+    return res.status(400).json({ error: 'An error occured.' });
+  }
+};
 // generates a new CSRF token on request
 const getToken = (req, res) => res.json({ csrfToken: req.csrfToken() });
 
@@ -168,5 +222,7 @@ module.exports = {
   settingsPage,
   changePass,
   changeUser,
+  deleteAccount,
+  resetHighScore,
   getToken,
 };

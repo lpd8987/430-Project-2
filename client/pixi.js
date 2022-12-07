@@ -28,6 +28,7 @@ const mousePosition = {x: 0, y: 0}
 let currentScore = 0;
 let highScore = 0;
 
+let nameDisplay = null;
 let scoreDisplay = null;
 let highScoreDisplay = null;
 
@@ -48,27 +49,44 @@ const getMousePosition = (e) => {
 
 
 //Player input
-const playerInput = (player) => {
+const playerInput = (app, playerSprite) => {
 //Move the player around the screen
     if(leftInputPressed){
-        player.x -= 5;
+        playerSprite.x -= 5;
     }
     if(rightInputPressed){
-        player.x += 5;
+        playerSprite.x += 5;
     }
     if(topInputPressed){
-        player.y -= 5;
+        playerSprite.y -= 5;
     }
     if(bottomInputPressed){
-        player.y += 5;
+        playerSprite.y += 5;
     }
 
-    if((leftInputPressed || rightInputPressed || topInputPressed || bottomInputPressed) &&
-    music.currentTime === 0){
+    //Y Axis Teleport
+    if(playerSprite.y < 0){
+        playerSprite.y = app.renderer.height - 20;
+    }
+    if(playerSprite.y > app.renderer.height){
+        playerSprite.y = 20;
+    }
+
+    //X Axis Teleport
+    if(playerSprite.x < 0){
+        playerSprite.x = app.renderer.width - 20;
+    }
+    if(playerSprite.x > app.renderer.width){
+        playerSprite.x = 20;
+    }
+
+    //Music should autoplay
+    if(leftInputPressed || rightInputPressed || topInputPressed || bottomInputPressed){
+        music.muted = false;
         music.play();
     }
 
-    player.rotation = Math.atan2((mousePosition.y - player.y), (mousePosition.x - player.x));
+    playerSprite.rotation = Math.atan2((mousePosition.y - playerSprite.y), (mousePosition.x - playerSprite.x));
 };
 
 //Sets up the key events that will be tied to game functions
@@ -237,7 +255,7 @@ const gameOver = (app, playerSprite, pickupSprites, enemySprites) => {
     //Update Display information before saving to database
     if(currentScore > highScore){
         highScore = currentScore;
-        highScore.innerHTML = `NEW HIGH SCORE: ${highScore}`;
+        highScoreDisplay.innerHTML = `NEW HIGH SCORE: ${highScore}`;
     }
 
     //delete player
@@ -256,9 +274,6 @@ const gameOver = (app, playerSprite, pickupSprites, enemySprites) => {
         enemySprites.splice(i, 1);
         i--;
     }
-
-    console.log(pickups.length);
-    console.log(enemies.length);
 
     saveData(currentScore);
 };
@@ -280,9 +295,9 @@ const getPlayerData = async () => {
     //console.log(dbDataJSON);
 
     if(dbDataJSON){
+        nameDisplay.innerHTML = dbDataJSON.username;
+
         highScore = dbDataJSON.highScore;
-        highScoreDisplay.innerHTML = `High Score: ${highScore}`;
-    } else {
         highScoreDisplay.innerHTML = `High Score: ${highScore}`;
     }
 };
@@ -365,7 +380,7 @@ const setupEnemies = async (app, numEnemies) => {
         enemySprite.scale = {x:0.1, y:0.1};
     
         enemySprite.x = Math.floor(Math.random() * (app.renderer.width - 100));
-        enemySprite.y = Math.floor(Math.random() * (app.renderer.height - 100));
+        enemySprite.y = 5;
 
         enemySprite.anchor.x = 0.5;
         enemySprite.anchor.y = 0.5;
@@ -377,6 +392,8 @@ const setupEnemies = async (app, numEnemies) => {
      return enemies;
 };
 
+
+//Respawns player and all interactables
 const resetGame = async (app) => {
     player = await setupPlayer(app);
     pickups = await setupCollectibles(app, 2);
@@ -386,6 +403,8 @@ const resetGame = async (app) => {
 
     await getPlayerData();
 
+    currentScore = 0;
+    
     loop(app, player, pickups, enemies);
 }
 
@@ -401,7 +420,7 @@ const loop = (app, playerSprite, pickupSprites, enemySprites) => {
             scoreDisplay.innerHTML = `Score: ${currentScore}`;
 
             //Update Player based on input
-            playerInput(playerSprite);
+            playerInput(app, playerSprite);
 
             //Have enemies follow the player
             followPlayer(enemySprites, playerSprite);
@@ -435,12 +454,14 @@ const initApp = async (data) => {
     //Complete setup and start loop
     setupInputEvents(app);
 
+    nameDisplay = document.getElementById('playerName');
     scoreDisplay = document.getElementById('score');
     highScoreDisplay = document.getElementById("highScore");
 
     await getPlayerData();
 
     music.loop = true;
+    music.muted = true;
 
     loop(app, player, pickups, enemies);
 };

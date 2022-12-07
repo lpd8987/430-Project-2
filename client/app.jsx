@@ -8,8 +8,11 @@ let leaderboardActive = false;
 const PIXIApp = () => {
     return (
         <div id="gameArea">
-            <h2 id="score">Score:</h2>
-            <p id="highScore">High Score: </p>
+            <div id="playerData">
+                <p className="has-text-weight-bold is-size-3" id="playerName">Username</p>
+                <p className="has-text-weight-bold is-size-3" id="score">Score:</p>
+                <p className="has-text-weight-bold is-size-3" id="highScore">High Score: </p>
+            </div>
         </div>
     );
 };
@@ -36,7 +39,7 @@ const Leaderboard = (props) => {
 
     return (
         <div id="leaderboard">
-            <h2 className="title">Leaderboard</h2>
+            <h2 className="title is-underlined">Leaderboard</h2>
             <ol className="content">
                 {leaderboardData}
             </ol>
@@ -46,13 +49,14 @@ const Leaderboard = (props) => {
 
 const GameSettings = (props) => {
     return (
-        <div>
-            <label htmlFor="musicSlider">Music Volume</label>
+        <form>
+            <h2 className="title is-underlined">Sound Options:</h2>
+            <label className="label" htmlFor="musicSlider">Music Volume</label>
             <input name="musicSlider" type="range" min="0" max="100" defaultValue={props.music.volume * 100} id="musicVolumeSlider"></input>
 
-            <label htmlFor="sfxSlider">SFX Volume</label>
+            <label className="label" htmlFor="sfxSlider">SFX Volume</label>
             <input name="sfxSlider" type="range" min="0" max="100" defaultValue={props.sfx[0].volume * 100} id="sfxVolumeSlider"></input>
-        </div>
+        </form>
     );
 }
 
@@ -60,10 +64,12 @@ const GameSettings = (props) => {
 const HowToPlay = () => {
     return (
         <div id="howToPlay">
-            <h2 className="title"><u>How To Play:</u></h2>
+            <h2 className="title is-underlined">How To Play:</h2>
             <ul className="content">
                 <li>Use WASD keys to move.</li>
                 <li>Avoid monsters and gather as many collectibles as you can!</li>
+                <li>Press the enter key to restart the game if you lose.</li>
+                <li>Hint: Moving out of bounds will move you to the other side.</li>
             </ul>
         </div>
     );

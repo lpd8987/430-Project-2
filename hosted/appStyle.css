@@ -32,3 +32,14 @@ li {
     display: list-item;
     list-style-position: inside;
 }
+
+#playerData {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+#playerName, #score, #highScore {
+    width: 20vw;
+    margin: 5px;
+}
