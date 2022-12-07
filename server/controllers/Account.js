@@ -74,7 +74,7 @@ const signup = async (req, res) => {
 const changePass = async (req, res) => {
   // to change their password, the user must type their old password in
   // then then add/retype their new password
-  const username  = req.session.account.username;
+  const { username } = req.session.account;
 
   const oldPass = `${req.body.oldPassword}`;
   const newPass = `${req.body.newPassword}`;
@@ -88,7 +88,7 @@ const changePass = async (req, res) => {
   // Assuming the user has made it this far, attempt to change the password
   try {
     // get a reference to the current account
-    const userAccount = await Account.findOne({ "username": username }).exec();
+    const userAccount = await Account.findOne({ username }).exec();
 
     // If userAccount is not found, throw an error
     /* Theoretically this should not be triggered if REDIS is working correctly */
@@ -109,11 +109,11 @@ const changePass = async (req, res) => {
   }
 };
 
-//Change the current user's username
-/*Code is largely the same as for change password, but changing username does not
-require as much security, nor does it automatically sign the current user out.*/
+// Change the current user's username
+/* Code is largely the same as for change password, but changing username does not
+require as much security, nor does it automatically sign the current user out. */
 const changeUser = async (req, res) => {
-  const username = req.session.account.username;
+  const { username } = req.session.account;
 
   const newUsername = `${req.body.newUsername}`;
 
@@ -121,20 +121,20 @@ const changeUser = async (req, res) => {
     return res.status(400).json({ error: 'Missing required parameters!' });
   }
 
-  //Check whether the username is already in the database
-  try{
-    const existingUserCheck = await Account.findOne({"username": newUsername}).exec();
-    if(existingUserCheck){
-      return res.status(400).json({error: "Username already taken!"});
+  // Check whether the username is already in the database
+  try {
+    const existingUserCheck = await Account.findOne({ username: newUsername }).exec();
+    if (existingUserCheck) {
+      return res.status(400).json({ error: 'Username already taken!' });
     }
   } catch (err) {
     console.log(err);
-    return res.status(400).json({error: 'An error occured.'})
+    return res.status(400).json({ error: 'An error occured.' });
   }
 
-  //Otherwise, find the current account and save over it.
+  // Otherwise, find the current account and save over it.
   try {
-    const currentUser = await Account.findOne({"username": username}).exec();
+    const currentUser = await Account.findOne({ username }).exec();
 
     // If userAccount is not found, throw an error
     /* Theoretically this should not be triggered if REDIS is working correctly */
@@ -142,71 +142,72 @@ const changeUser = async (req, res) => {
       throw new Error();
     }
 
-    //Save the new username to the account
+    // Save the new username to the account
     currentUser.username = newUsername;
     await currentUser.save();
 
-    //Save the username change in session details
+    // Save the username change in session details
     req.session.account = Account.toAPI(currentUser);
-    
-    return res.status(201).json({message: "Username changed successfully!"});
 
+    return res.status(201).json({ message: 'Username changed successfully!' });
   } catch (err) {
     console.log(err);
     return res.status(400).json({ error: 'An error occured.' });
   }
 };
 
-//Very similar code to login, but this time it requires the user's credentials to go about deleting their account altogether
-const deleteAccount = async(req, res) => {
+/* Very similar code to login, but this time it requires the user's
+credentials to go about deleting their account altogether */
+const deleteAccount = async (req, res) => {
   const username = `${req.body.username}`;
   const pass = `${req.body.pass}`;
 
-  //Check for all params
+  // Check for all params
   if (!username || !pass) {
     return res.status(400).json({ error: 'All fields are required!' });
   }
 
-  //Make sure credentials pass
+  // Make sure credentials pass
   Account.authenticate(username, pass, (err, account) => {
     if (err || !account) {
       return res.status(401).json({ error: 'Wrong username or password!' });
     }
+    return false;
   });
 
-  try{
-    await Account.deleteOne({ "username": username }).exec();
+  try {
+    await Account.deleteOne({ username }).exec();
     return res.status(200).json({ redirect: '/logout' });
-  }catch (err) {
+  } catch (err) {
     console.log(err);
     return res.status(400).json({ error: 'An error occured.' });
   }
 };
 
-//Again, very similar code to login, but this time it resets player high score
-const resetHighScore = async(req, res) => {
+// Again, very similar code to login, but this time it resets player high score
+const resetHighScore = async (req, res) => {
   const username = `${req.body.username}`;
   const pass = `${req.body.pass}`;
 
-  //Check for all params
+  // Check for all params
   if (!username || !pass) {
     return res.status(400).json({ error: 'All fields are required!' });
   }
 
-  //Make sure credentials pass
+  // Make sure credentials pass
   Account.authenticate(username, pass, (err, account) => {
     if (err || !account) {
       return res.status(401).json({ error: 'Wrong username or password!' });
     }
+    return false;
   });
 
-  try{
-    const userAccount = await Account.findOne({ "username": username }).exec();
+  try {
+    const userAccount = await Account.findOne({ username }).exec();
     userAccount.highScore = 0;
     await userAccount.save();
-    return res.status(200).json({message: "Account data updated."})
-
-  }catch (err) {
+    return res.status(200).json({ message: 'Account data updated.' });
+  } catch (err) {
     console.log(err);
     return res.status(400).json({ error: 'An error occured.' });
   }
