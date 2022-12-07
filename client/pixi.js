@@ -234,7 +234,7 @@ const respawnCollectible = (app, pickupSprites) => {
     //Create a new Sprite
     const pickupSprite = new PIXI.Sprite(pickupTex);
  
-    pickupSprite.scale = {x:0.1, y:0.1};
+    pickupSprite.scale = {x:1, y:1};
 
     pickupSprite.x = Math.floor(Math.random() * (app.renderer.width - 100));
     pickupSprite.y = Math.floor(Math.random() * (app.renderer.height - 100));
@@ -306,12 +306,12 @@ const getPlayerData = async () => {
 const setupPlayer = async (app) => {
     //Sprite Setup
     if(!playerTex){
-        playerTex = await PIXI.Assets.load('/assets/img/topDownSprite.png');
+        playerTex = await PIXI.Assets.load('/assets/img/player.png');
     }
     const playerSprite = new PIXI.Sprite(playerTex);
 
     //Properties
-    playerSprite.scale = {x:0.3, y:0.3};
+    playerSprite.scale = {x:3, y:3};
 
     playerSprite.x = app.renderer.width/2;
     playerSprite.y = app.renderer.height/2;
@@ -326,11 +326,11 @@ const setupPlayer = async (app) => {
 
 const setupBackground = async (app) => {
     //Background is its own sprite
-    const bgTex = await PIXI.Assets.load('/assets/img/darkBackground.jpg');
+    const bgTex = await PIXI.Assets.load('/assets/img/Floor.png');
     const bg = new PIXI.TilingSprite(bgTex, window.innerWidth, window.innerHeight);
 
     //Edit background properties
-    bg.position.set(0,0);
+    bg.scale = {x: 3, y:3};
     bg.interactive = true;
     bg.on("mousemove", getMousePosition);
 
@@ -351,7 +351,7 @@ const setupCollectibles = async (app, numCollectibles) => {
      for (let i = 0; i < numCollectibles; i++) {
         const pickupSprite = new PIXI.Sprite(pickupTex);
  
-        pickupSprite.scale = {x:0.1, y:0.1};
+        pickupSprite.scale = {x:1, y:1};
     
         pickupSprite.x = Math.floor(Math.random() * (app.renderer.width - 100));
         pickupSprite.y = Math.floor(Math.random() * (app.renderer.height - 100));
@@ -371,13 +371,13 @@ const setupEnemies = async (app, numEnemies) => {
 
     //Only load enemy texture in once
     if(!enemyTex){
-        enemyTex = await PIXI.Assets.load('/assets/img/monster.jpg');
+        enemyTex = await PIXI.Assets.load('/assets/img/monster.png');
     }
 
     for (let i = 0; i <= numEnemies; i++) {
         const enemySprite = new PIXI.Sprite(enemyTex);
  
-        enemySprite.scale = {x:0.1, y:0.1};
+        enemySprite.scale = {x:1, y:1};
     
         enemySprite.x = Math.floor(Math.random() * (app.renderer.width - 100));
         enemySprite.y = 5;
@@ -404,7 +404,7 @@ const resetGame = async (app) => {
     await getPlayerData();
 
     currentScore = 0;
-    
+
     loop(app, player, pickups, enemies);
 }
 

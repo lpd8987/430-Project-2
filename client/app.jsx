@@ -47,6 +47,7 @@ const Leaderboard = (props) => {
     );
 };
 
+//Allows the user to adjust any sound coming from the game
 const GameSettings = (props) => {
     return (
         <form>

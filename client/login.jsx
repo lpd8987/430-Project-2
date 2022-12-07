@@ -23,6 +23,7 @@ const handleLogin = (e) => {
     return false;
 };
 
+//Creates a new account on the server
 const handleSignup = (e) => {
     const elementIds = ['user', 'pass', 'pass2'];
 
@@ -49,7 +50,7 @@ const handleSignup = (e) => {
     return false;
 };
 
-//Login JSX content
+//REACT COMPONENTS
 const LoginWindow = (props) => {
     return (
         <form id="loginForm"
@@ -73,7 +74,6 @@ const LoginWindow = (props) => {
     );
 };
 
-//Signup JSX content
 const SignupWindow = (props) => {
     return (
         <form id="signupForm"
